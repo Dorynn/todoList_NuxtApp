@@ -2,13 +2,21 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Delicious Handrawn', cursive;
-/* font-family: 'Shadows Into Light', cursive; */
+    /* font-family: 'Delicious Handrawn', cursive; */
+    /* font-family: 'Encode Sans Expanded', sans-serif; */
+    /* font-family: 'Jost', sans-serif; */
+    /* font-family: 'Open Sans', sans-serif; */
+    /* font-family: 'Shadows Into Light', cursive; */
   }
 
-  p{
-    font-size: 24px;
-  }
+.info{
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.info, .infContent{
+  margin-top: 10px;
+}
 
 
 

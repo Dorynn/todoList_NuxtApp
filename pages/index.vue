@@ -33,9 +33,9 @@ export default {
     position: absolute;
     width: 1200px;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-    transform: translateY(-50%);
+    transform: translate(-50%,-50%);
     top: 50%;
-    left: 20%;
+    left: 50%;
     
   }
 }

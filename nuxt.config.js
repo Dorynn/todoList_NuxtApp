@@ -11,18 +11,22 @@ export default {
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
       { rel: 'preconnect', href:"https://fonts.googleapis.com"},
-      { rel: 'preconnect', href:"https://fonts.gstatic.com"},
-      { rel: 'stylesheet', href:"https://fonts.googleapis.com/css2?family=Delicious+Handrawn&family=Shadows+Into+Light&display=swap"},
+      { rel: 'preconnect', href:"https://fonts.gstatic.com", crossorigin:''},
+      { rel: 'stylesheet', href:"https://fonts.googleapis.com/css2?family=Delicious+Handrawn&family=Encode+Sans+Expanded:wght@300&family=Jost:wght@200;300&family=Open+Sans&family=Shadows+Into+Light&display=swap"},
     ]
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: [
     '~/assets/css/globalCss.css',
+    '~/assets/css/tooltip.css',
   ],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
+    {src:'~/plugins/toast_notif.js', mode:'client'},
+    {src:'~/plugins/v-tooltip.js', mode:'client'},
+
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -66,6 +70,7 @@ export default {
 
   // Content module configuration: https://go.nuxtjs.dev/config-content
   content: {},
+  // ssr: false,
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {

@@ -1,17 +1,4 @@
 <template>
-  <main class="main">
-
-  </main>
+  <div>
+  </div>
 </template>
-
-<script>
-import headerDefault from '~/components/headerDefault.vue'
-export default {
-  components: { headerDefault },
-
-}
-</script>
-
-<style>
-
-</style>
