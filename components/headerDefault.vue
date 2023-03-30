@@ -29,20 +29,24 @@
               >Search</b-button
             >
           </b-nav-form>
+          <!-- <nuxt-link to="/todoPage/userProfile">
+              Sign out
+          </nuxt-link> -->
 
           <b-nav-item-dropdown right>
             <template #button-content> User </template>
 
-            <b-dropdown-item href="#">
+            <!-- <b-dropdown-item href="#">
               <nuxt-link to="/todoPage/userProfile/user1">
                 <font-awesome-icon :icon="['fas', 'user']" />
               </nuxt-link>
+            </b-dropdown-item> -->
+            <b-dropdown-item href="/todoPage/userProfile/user1">
+              Profile 
             </b-dropdown-item>
-            <b-navbar-brand href="">
-              <font-awesome-icon :icon="['fas', 'house']" />
-            </b-navbar-brand>
-            <b-dropdown-item href="#">RU</b-dropdown-item>
-            <b-dropdown-item href="#">FA</b-dropdown-item>
+            <b-dropdown-item href="">
+              Sign out 
+            </b-dropdown-item>
           </b-nav-item-dropdown>
         </b-navbar-nav>
       </b-collapse>

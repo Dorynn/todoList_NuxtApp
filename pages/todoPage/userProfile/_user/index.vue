@@ -75,7 +75,10 @@
   export default {
     props:{
         users:Array,
-        userID: Number
+        userID: {
+          type:Number,
+          default:0,
+        }
     }
 
   };

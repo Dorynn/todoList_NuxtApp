@@ -2,44 +2,73 @@
   <div id="homePage">
     <h1 class="title">Todo List</h1>
     <div class="control">
-      <b-button v-b-modal.modal-1 variant="success">Add</b-button>
+      <b-button v-b-modal.modal-1 variant="success" @click="changeIsModalAdd"
+        >Add</b-button
+      >
       <b-modal
         id="modal-1"
-        ref="modal1"
+        :ref="changeModal()"
         title="Add task"
-        @ok="onAdd('modal1')"
+        @ok="onModal(changeModal())"
         @hide="resetInfoModal"
         :ok-disabled="!validInput"
       >
-        <p>Task</p>
-        <b-form-input
-          v-model="todoValue"
-          placeholder="Enter your task"
-        ></b-form-input>
-        <p>Description</p>
-        <b-form-textarea
-          id="textarea-default"
-          placeholder="Enter task's description...."
-          v-model="descriptionValue"
-        ></b-form-textarea>
+        <b-form-group
+          id="input-todo"
+          label="Task"
+          label-for="input-todo-content"
+        >
+          <b-form-input
+            id="input-todo-content"
+            v-model="todoValue"
+            placeholder="Enter your task"
+            :state="inputTodoState()"
+            aria-describedby="input-1-live-feedback"
+          ></b-form-input>
+          <b-form-invalid-feedback id="input-1-live-feedback">
+            Enter at least 3 letters
+          </b-form-invalid-feedback>
+        </b-form-group>
+        <b-form-group
+          id="input-description"
+          label="Description"
+          label-for="input-default"
+        >
+          <b-form-textarea
+            id="input-default"
+            placeholder="Enter task's description...."
+            v-model="descriptionValue"
+            :state="inputDescState()"
+            aria-describedby="input-2-live-feedback"
+          ></b-form-textarea>
+          <b-form-invalid-feedback id="input-2-live-feedback">
+            Enter maximum 100 letters
+          </b-form-invalid-feedback>
+        </b-form-group>
       </b-modal>
-      <b-form-checkbox
-        v-model="checked"
-        name="check-button"
-        switch
-        @change="changeBackground"
-        size="lg"
-      >
-        <p>Theme</p>
-      </b-form-checkbox>
+      <div>
+        <b-form-checkbox
+          v-model="checked"
+          name="check-button"
+          switch
+          @change="changeBackground()"
+          size="lg"
+        >
+          <p>Theme</p>
+        </b-form-checkbox>
+      </div>
     </div>
     <b-table
       :fields="fields"
-      :items="items"
+      :items="dataArray"
+      :filter="todoSearch"
+      :filter-included-fields="filterCol"
+      :table-variant="background"
+      :no-sort-reset="false"
+      :keyword="statusSearchInput"
       bordered
       table-class="w-50"
       class="taskTable"
-      :table-variant="background"
       hover
       striped
       fixed
@@ -52,6 +81,27 @@
           :style="{ width: changeWidthCol(field.key) }"
         />
       </template>
+      <template #head(todo)>
+        <b-form-group
+          label="Todo"
+          label-for="filter-input"
+          label-cols-sm="2"
+          label-align-sm="left"
+          label-size="sm"
+          class="mb-0"
+          style="text-align: center"
+        >
+          <b-input-group size="sm" class="">
+            <b-form-input
+              id="filter-input"
+              v-model="todoSearch"
+              type="search"
+              placeholder="Type to Search"
+              @focus="setIsTodoFilter()"
+            ></b-form-input>
+          </b-input-group>
+        </b-form-group>
+      </template>
       <template #cell(todo)="data">
         <p
           @click="data.toggleDetails"
@@ -62,6 +112,26 @@
         >
           {{ data.value }}
         </p>
+      </template>
+      <template #head(status)>
+        <b-form-group
+          label="Status"
+          label-for="filter-input-status"
+          label-cols-sm="3"
+          label-align-sm="right"
+          label-size="sm"
+          class="mb-0"
+        >
+          <b-input-group size="sm">
+            <b-form-input
+              id="filter-input-status"
+              v-model="statusSearchInput"
+              type="text"
+              placeholder="Type to Search"
+              @focus="setIsStatusFilter()"
+            ></b-form-input>
+          </b-input-group>
+        </b-form-group>
       </template>
       <template #cell(status)="data1">
         <b-button
@@ -75,6 +145,8 @@
           :icon="['fas', 'pen-to-square']"
           @click="onEdit(data2.item, data2.index, $event.target)"
           class="delBtn"
+          v-b-modal.modal-1
+          v-tooltip.hover="'Click to edit this task!'"
         />
       </template>
       <template #cell(delete)="data3">
@@ -105,34 +177,12 @@
         </b-card>
       </template>
     </b-table>
-    <b-modal
-      :id="infoModal.id"
-      :title="infoModal.title"
-      @hide="resetInfoModal"
-      :ok-disabled="!validInput"
-      @ok="updateTodo"
-    >
-      <p>Task</p>
-      <b-form-input
-        v-model="todoValue"
-        placeholder="Enter your task"
-      ></b-form-input>
-      <p>Description</p>
-      <b-form-textarea
-        id="textarea-default"
-        placeholder="Enter task's description...."
-        v-model="descriptionValue"
-        @input="updateDescription(descriptionValue)"
-        >this is text temp</b-form-textarea
-      >
-    </b-modal>
+    <small>*(Click non-sortable fields to cancel sorting)</small>
   </div>
 </template>
 
 <script>
-// import headerDefault from '~/components/headerDefault.vue';
 export default {
-  // components: { headerDefault },
   name: "IndexPage",
   // asyncData(context){
   //   console.log(context)
@@ -154,25 +204,28 @@ export default {
   // },
   data() {
     return {
+      // keyword:'',
+      isSorted: false,
       checked: false,
       todoValue: "",
       descriptionValue: "",
       isComplete: false,
-      background: "",
+      isModal: false,
+      background: "light",
       bgStatus: "",
       isValidTodo: null,
       isValidDes: null,
-      infoModal: {
-        id: "info-modal",
-        title: "",
-        content: "",
-      },
+      todoSearch: null,
+      statusSearchInput: null,
+      filterCol: ["todo"],
+      isColFilter: false,
       curIndex: 0,
       fields: [
         {
           key: "todo",
           label: "Todo",
           formatter: "",
+          sortable: true,
         },
         {
           key: "status",
@@ -180,6 +233,7 @@ export default {
           formatter: (value) => {
             return value ? "Done" : "Incomplete";
           },
+          sortable: true,
         },
         {
           // A regular column with custom formatter
@@ -199,33 +253,43 @@ export default {
     };
   },
   computed: {
-    // inputTodoState() {
-    //   console.log(1, this.isValidTodo);
-    //   if (this.todoValue.length === 0) this.isValidTodo = null;
-    //   else if (this.todoValue.length < 3 || this.todoValue.length > 50)
-    //     this.isValidTodo = false;
-    //   else this.isValidTodo = true;
-    //   return this.isValidTodo;
-    // },
-    // inputDescState() {
-    //   if (this.descriptionValue.length == 0) this.isValidDes = null;
-    //   else if (this.descriptionValue.length > 150) this.isValidDes = false;
-    //   else this.isValidDes = true;
-    //   return this.isValidDes;
-    // },
     validInput() {
       return this.isValidDes && this.isValidTodo;
     },
+    dataArray(){
+      const str='Incomplete'
+      const str2='Done'
+      console.log(this.statusSearchInput)
+      if(str.includes(this.statusSearchInput)&&this.statusSearchInput!==''){
+        return this.items.filter(item=>item.status===false)
+      }
+      if(str2.includes(this.statusSearchInput)&&this.statusSearchInput !==''){
+        return this.items.filter(item=>item.status===true)
+      }
+      if(!str.includes(this.statusSearchInput)||!str2.includes(this.statusSearchInput)){
+        return this.items
+      }
+      if(this.statusSearchInput){
+        return this.items
+      }
+
+      // return str.includes(this.statusSearchInput)&&this.statusSearchInput!==''?this.items.filter(item=>item.status===false):this.items
+    },
   },
   methods: {
-    onAdd() {
-      const data = {
-        todo: this.todoValue,
-        status: false,
-        description: this.descriptionValue,
-      };
-      this.items = [...this.items, data];
-      this.toast("b-toaster-top-center", "success");
+    onModal(ref) {
+      if (ref === "modal1") {
+        const data = {
+          todo: this.todoValue,
+          status: false,
+          description: this.descriptionValue,
+        };
+        this.items = [...this.items, data];
+        this.toast("b-toaster-top-center", "success");
+      } else {
+        this.updateTodo();
+      }
+      console.log(ref);
     },
     onStatus(index) {
       this.items[index].status = !this.items[index].status;
@@ -241,34 +305,28 @@ export default {
     resetInfoModal() {
       this.todoValue = "";
       this.descriptionValue = "";
-      this.infoModal.title = "";
-      this.infoModal.content = "";
     },
     onEdit(item, index, button) {
-      this.infoModal.title = `Edit task:`;
-      this.$root.$emit("bv::show::modal", this.infoModal.id, button);
       this.curIndex = index;
       this.todoValue = item.todo;
       this.descriptionValue = item.description;
+      this.isModal = false;
+      console.log("when click edit icon: ", this.isModal);
     },
     updateTodo() {
       this.items[this.curIndex].todo = this.todoValue;
+      this.items[this.curIndex].description = this.descriptionValue;
       console.log("pluginnnnn: ", this.$toast);
       this.$toast.success("Edit successfully!");
-    },
-
-    updateDescription() {
-      this.items[this.curIndex].description = this.descriptionValue;
     },
     changeBackground() {
       this.checked ? (this.background = "dark") : (this.background = "light");
     },
     changeWidthCol(key) {
-      if (key === "todo") return "120px";
+      if (key === "todo") return "90px";
       if (key === "status") return "50px";
       if (key === "delete" || key === "edit") return "20px";
     },
-
     toast(toaster, variant = null, append = false) {
       this.$bvToast.toast(`New task added successfully!`, {
         title: `Success`,
@@ -279,9 +337,72 @@ export default {
         autoHideDelay: 1000,
       });
     },
-
     changeBgStatus(statusState) {
       return statusState ? "success" : "danger";
+    },
+    inputTodoState() {
+      // console.log(1, this.isValidTodo);
+      if (this.todoValue.length === 0) return (this.isValidTodo = null);
+      else if (this.todoValue.length < 3 || this.todoValue.length > 50)
+        return (this.isValidTodo = false);
+      else this.isValidTodo = true;
+      return this.isValidTodo;
+    },
+    inputDescState() {
+      if (this.descriptionValue.length == 0) return (this.isValidDes = null);
+      if (this.descriptionValue.length > 150) return (this.isValidDes = false);
+      else this.isValidDes = true;
+      return this.isValidDes;
+    },
+    changeModal() {
+      return this.isModal ? "modal1" : "modal2";
+    },
+    changeIsModalAdd() {
+      this.isModal = true;
+      console.log("when click add button", this.isModal);
+    },
+    onTodoSearch() {
+      this.items = this.items.filter((item) => {
+        return item.todo === this.todoSearch;
+      });
+    },
+    changeSearchParams() {
+      if (this.isColFilter) {
+        return this.todoSearch;
+      } else {
+        console.log("this is statusSearchInput: ", this.statusSearchInput);
+        return this.statusSearchInput;
+      }
+    },
+    changeSearchField() {
+      if (this.isColFilter) {
+        this.filterCol[0] = "todo";
+      } else {
+        this.filterCol[0] = "status";
+      }
+      return this.filterCol;
+    },
+    setIsStatusFilter() {
+      this.isColFilter = false;
+    },
+    setIsTodoFilter() {
+      this.isColFilter = true;
+    },
+    onStatusFilter(status) {
+      const IncompleteArr = "Incomplete";
+      const DoneArr = "Done";
+      // const temp = [];
+      // if (IncompleteArr.includes(this.statusSearchInput)) {
+      //   this.items = this.items.filter((item) => {
+      //     return item.status === false;
+      //   });
+      // }
+      // if (DoneArr.includes(this.statusSearchInput)) {
+      //   this.items = this.items.filter((item) => {
+      //     return item.status === true;
+      //   });
+      // }
+      console.log(status)
     },
   },
 };
@@ -317,6 +438,13 @@ export default {
         text-decoration: underline;
       }
     }
+    .headTodoCol {
+      display: flex;
+      justify-content: space-around;
+      .searchTodoInput {
+        width: 200px;
+      }
+    }
   }
 }
 
@@ -330,7 +458,7 @@ export default {
 }
 
 .thead-primary {
-  background-color: rgb(39, 37, 37);
+  background-color: rgba(39, 37, 37, 0.705);
   color: #ffffff;
 }
 </style>
