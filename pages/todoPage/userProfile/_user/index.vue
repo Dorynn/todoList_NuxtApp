@@ -5,7 +5,7 @@
         <b-col class="professionalDetail" cols="4">
           <h4 class="info">Professional Detail</h4>
           <img
-            src="../../../../assets/image/coffee.jpg"
+            :src="image[userID].url"
             alt="avatar"
             class="avatar"
           />
@@ -65,20 +65,44 @@
           </b-row>
           <h4 class="info">I'm web developer</h4>
           <hr>
-          <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Recusandae soluta consectetur ipsam, quidem dolores neque eveniet veniam quae officiis aliquid sapiente omnis earum qui quasi, placeat, voluptate error! Non quo facere dolore tenetur quis adipisci?</p>
+          <!-- <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Recusandae soluta consectetur ipsam, quidem dolores neque eveniet veniam quae officiis aliquid sapiente omnis earum qui quasi, placeat, voluptate error! Non quo facere dolore tenetur quis adipisci?</p> -->
+          <!-- <p>{{ descUser[userID] }}</p> -->
+          <p>{{ image[userID].title }}</p>
         </b-col>
       </b-row>
     </div>
   </template>
   
   <script>
+import {mapState} from 'vuex';
+import { mapGetters } from 'vuex';
   export default {
+    head(){
+      return{
+        title: `${this.users[this.userID].name}`
+      }
+    },
     props:{
         users:Array,
         userID: {
           type:Number,
           default:0,
         }
+    },
+    async fetch({$axios, store}){
+      let image = await $axios.$get('https://jsonplaceholder.typicode.com/photos');
+      store.commit('setImage', image);
+        // await store.dispatch('loadDescUser');
+    },
+    // async fetch({store}){
+
+    // },
+    computed: {
+      ...mapState({
+        image: 'images'
+      }),
+      // ...mapGetters(['descUser'])
+
     }
 
   };

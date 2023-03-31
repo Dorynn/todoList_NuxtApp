@@ -9,6 +9,11 @@
 // import headerDefault from '~/components/headerDefault.vue'
 export default {
   // components: { headerDefault },
+  head(){
+    return{
+      titleTemplate:'Todo List - %s'
+    }
+  }
 
 }
 </script>

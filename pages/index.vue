@@ -6,6 +6,7 @@
       class="jumbotron"
     >
       <p>For more information visit website</p>
+      <p>{{ $store.state.name }}</p>
       <nuxt-link to="/todoPage/taskList">
         <b-button variant="primary">Click here</b-button>
       </nuxt-link>
@@ -16,6 +17,7 @@
 <script>
 export default {
   name: "IndexPage",
+  
 };
 </script>
 

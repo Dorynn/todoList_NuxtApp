@@ -29,9 +29,7 @@
               >Search</b-button
             >
           </b-nav-form>
-          <!-- <nuxt-link to="/todoPage/userProfile">
-              Sign out
-          </nuxt-link> -->
+          <!-- <nuxt-link to="/todoPage/userProfile"> Sign out </nuxt-link> -->
 
           <b-nav-item-dropdown right>
             <template #button-content> User </template>
@@ -41,11 +39,11 @@
                 <font-awesome-icon :icon="['fas', 'user']" />
               </nuxt-link>
             </b-dropdown-item> -->
-            <b-dropdown-item href="/todoPage/userProfile/user1">
-              Profile 
+            <b-dropdown-item href="">
+              <nuxt-link to="/todoPage/userProfile/user0"> Profile </nuxt-link>
             </b-dropdown-item>
             <b-dropdown-item href="">
-              Sign out 
+              Sign out
             </b-dropdown-item>
           </b-nav-item-dropdown>
         </b-navbar-nav>
