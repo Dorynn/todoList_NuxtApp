@@ -8,7 +8,7 @@
       <b-modal
         id="modal-1"
         :ref="changeModal()"
-        title="Add task"
+        :title="title"
         @ok="onModal(changeModal())"
         @hide="resetInfoModal"
         :ok-disabled="!validInput"
@@ -69,6 +69,7 @@
       :filter-included-fields="changeSearchField()"
       :table-variant="background"
       :no-sort-reset="false"
+      :no-provider-sorting="true"
       bordered
       table-class="w-50"
       class="taskTable"
@@ -100,7 +101,7 @@
               v-model="todoSearch"
               type="search"
               placeholder="Type to Search"
-              @focus="setIsTodoFilter()"
+              @focus="setIsTodoFilter('filter-input')"
             ></b-form-input>
           </b-input-group>
         </b-form-group>
@@ -145,8 +146,8 @@
       </template> -->
       <template #head(status2)>
         <b-form-group
-          label="Status2"
-          label-for="filter-input"
+          label="Status"
+          label-for="filter-status2"
           label-cols-sm="2"
           label-align-sm="left"
           label-size="sm"
@@ -155,11 +156,11 @@
         >
           <b-input-group size="sm" class="">
             <b-form-input
-              id="filter-input-status2"
+              id="filter-status2"
               v-model="status2SearchInput"
               type="search"
               placeholder="Type to Search"
-              @focus="setIsStatus2Filter()"
+              @focus="setIsStatus2Filter('filter-status2')"
             ></b-form-input>
           </b-input-group>
         </b-form-group>
@@ -230,6 +231,8 @@ export default {
   //     }, 1500)
   //     }).then((data)=>{
   //       return data
+
+
   //     }).catch((e)=>{
   //       console.log(e)
   //   })
@@ -237,6 +240,8 @@ export default {
   data() {
     return {
       // keyword:'',
+      filter:null,
+      title:"Add task",
       isSorted: false,
       checked: false,
       todoValue: "",
@@ -247,10 +252,10 @@ export default {
       // bgStatus: "",
       isValidTodo: null,
       isValidDes: null,
-      todoSearch: null,
+      todoSearch: "",
       // statusSearchInput: '',
-      status2SearchInput:null,
-      filterCol: ["todo"],
+      status2SearchInput:"",
+      filterCol: [],
       isColFilter: false,
       curIndex: 0,
       selected: null,
@@ -289,7 +294,8 @@ export default {
         // },
         {
           key: "status2",
-          label: "Status2"
+          label: "Status2",
+          sortable: true,
         },
         {
           // A regular column with custom formatter
@@ -310,8 +316,14 @@ export default {
   },
   computed: {
     validInput() {
-      return this.isValidDes && this.isValidTodo;
+      return this.isValidDes && this.isValidTodo && this.selected;
     },
+    // changeSearchParams(){
+    //   if (this.isColFilter)
+    //     return this.todoSearch;
+    //   else
+    //     return this.status2SearchInput;
+    // }
     // dataArray(){
     //   const str='incomplete'
     //   const str2='done'
@@ -370,6 +382,7 @@ export default {
       this.descriptionValue = item.description;
       this.selected = item.status2;
       this.isModal = false;
+      this.title="Edit task";
       console.log("when click edit icon: ", this.isModal);
     },
     updateTodo() {
@@ -384,7 +397,7 @@ export default {
     },
     changeWidthCol(key) {
       if (key === "todo") return "90px";
-      if (key === "status2") return "60px"
+      if (key === "status2") return "70px"
       if (key === "delete" || key === "edit") return "20px";
     },
     toast(toaster, variant = null, append = false) {
@@ -414,39 +427,61 @@ export default {
       else this.isValidDes = true;
       return this.isValidDes;
     },
+    // inputStatusState(){
+    //   if(this.selected===null){
+    //     re
+    //   }
+    // },
     changeModal() {
       return this.isModal ? "modal1" : "modal2";
     },
     changeIsModalAdd() {
-      this.isModal = true;
+      this.isModal = true;  
+      this.title="Add task";
       console.log("when click add button", this.isModal);
     },
-    onTodoSearch() {
-      this.items = this.items.filter((item) => {
-        return item.todo === this.todoSearch;
-      });
-    },
+    // onTodoSearch() {
+    //   this.items = this.items.filter((item) => {
+    //     return item.todo === this.todoSearch;
+    //   });
+    // },
     changeSearchParams() {
       if (this.isColFilter) {
+        console.log("this is todoSearchInput: ", this.todoSearch);
         return this.todoSearch;
-      } else {
+      }
+      if(this.isColFilter===false){
         console.log("this is statusSearchInput: ", this.status2SearchInput);
         return this.status2SearchInput;
       }
     },
     changeSearchField() {
       if (this.isColFilter) {
-        this.filterCol[0] = "todo";
-      } else {
-        this.filterCol[0] = "status2";
+        // this.filterCol[0] = 'todo';
+        return ['todo'];
+      } 
+      if(this.isColFilter==false) {
+        // this.filterCol[0] = 'status2';
+
+        return ['status2']
       }
       return this.filterCol;
     },
     setIsStatus2Filter() {
+
       this.isColFilter = false;
+
     },
     setIsTodoFilter() {
       this.isColFilter = true;
+  
+      // this.changeSearchField();
+      // this.changeSearchParams();
+      // if(inputID === 'filter-input'){
+      //   this.isColFilter=true;
+      // }else if(inputID ==='filter-status2'){
+      //   this.isColFilter=false;
+      // }
     },
     changeStatusState(val){
       if(val==='Done'){
