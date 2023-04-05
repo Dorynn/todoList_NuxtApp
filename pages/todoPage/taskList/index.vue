@@ -8,47 +8,55 @@
       <b-modal
         id="modal-1"
         :ref="changeModal()"
-        title="Add task"
-        @ok="onModal(changeModal())"
-        @hide="resetInfoModal"
-        :ok-disabled="!validInput"
+        :title="title"
+        @ok="handleOk($event, changeModal())"
+        @hidden="resetInfoModal"
       >
-        <b-form-group
-          id="input-todo"
-          label="Task"
-          label-for="input-todo-content"
-        >
-          <b-form-input
-            id="input-todo-content"
-            v-model="todoValue"
-            placeholder="Enter your task"
-            :state="inputTodoState()"
-            aria-describedby="input-1-live-feedback"
-          ></b-form-input>
-          <b-form-invalid-feedback id="input-1-live-feedback">
-            Enter at least 3 letters
-          </b-form-invalid-feedback>
-        </b-form-group>
-        <b-form-group label="Status">
-          <b-form-select v-model="selected" :options="options" ></b-form-select>
-        </b-form-group>
-        <b-form-group
-          id="input-description"
-          label="Description"
-          label-for="input-default"
-        >
-          <b-form-textarea
-            id="input-default"
-            placeholder="Enter task's description...."
-            v-model="descriptionValue"
-            :state="inputDescState()"
-            aria-describedby="input-2-live-feedback"
-          ></b-form-textarea>
-          <b-form-invalid-feedback id="input-2-live-feedback">
-            Enter maximum 100 letters
-          </b-form-invalid-feedback>
-        </b-form-group>
+        <form ref="form" @submit.stop.prevent="handleSubmit">
+          <b-form-group
+            id="input-todo"
+            label="Task"
+            label-for="input-todo-content"
+            invalid-feedback="Your task shouldn't have special key like @,/..., require content length about 3 to 20 letters"
+            :state="isValidTodo"
+          >
+            <b-form-input
+              id="input-todo-content"
+              v-model.trim="todoValue"
+              placeholder="Enter your task"
+              :state="isValidTodo"
+              @keydown="nameKeydown($event)"
+              required
+              @blur="inputTodoState()"
 
+            ></b-form-input>
+          </b-form-group>
+          <b-form-group label="Status">
+            <b-form-select v-model="selected" :options="options" required>
+            </b-form-select>
+            <small v-show="isStatusState" style="color: red"
+              >Must choose one status</small
+            >
+          </b-form-group>
+          <b-form-group
+            id="input-description"
+            label="Description"
+            label-for="input-default"
+            invalid-feedback="Description should not over 100 letter and contain special key (@, /, ....)"
+            :state="isValidDes"
+          >
+            <b-form-textarea
+              id="input-default"
+              placeholder="Enter task's description...."
+              v-model.trim="descriptionValue"
+              :state="isValidDes"
+              @input="descKeyDown($event)"
+              @blur="inputDescState()"
+              required
+              
+            ></b-form-textarea>
+          </b-form-group>
+        </form>
       </b-modal>
       <div>
         <b-form-checkbox
@@ -69,6 +77,7 @@
       :filter-included-fields="changeSearchField()"
       :table-variant="background"
       :no-sort-reset="false"
+      show-empty
       bordered
       table-class="w-50"
       class="taskTable"
@@ -83,6 +92,12 @@
           :key="field.key"
           :style="{ width: changeWidthCol(field.key) }"
         />
+      </template>
+      <template #empty="scope">
+        <h5>{{ scope.emptyText }}</h5>
+      </template>
+      <template #emptyfiltered="scope">
+        <h5>{{ scope.emptyFilteredText }}</h5>
       </template>
       <template #head(todo)>
         <b-form-group
@@ -107,8 +122,8 @@
       </template>
       <template #cell(todo)="data">
         <p
-          @click="data.toggleDetails"
-          :class="{ active: data.item.status2==='Done' }"
+          @click="checkShowDetails(data.index, data.detailsShowing)"
+          :class="{ active: data.item.status2 === 'Done' }"
           class="todoContent"
           v-b-tooltip.hover
           title="Click to see details content"
@@ -116,33 +131,6 @@
           {{ data.value }}
         </p>
       </template>
-      <!-- <template #head(status)>
-        <b-form-group
-          label="Status"
-          label-for="filter-input-status"
-          label-cols-sm="3"
-          label-align-sm="right"
-          label-size="sm"
-          class="mb-0"
-        >
-          <b-input-group size="sm">
-            <b-form-input
-              id="filter-input-status"
-              v-model="statusSearchInput"
-              type="search"
-              placeholder="Type to Search"
-              @focus="setIsStatusFilter()"
-            ></b-form-input>
-          </b-input-group>
-        </b-form-group>
-      </template> -->
-      <!-- <template #cell(status)="data1">
-        <b-button
-          :variant="changeBgStatus(data1.item.status)"
-          @click="onStatus(data1.index)"
-          >{{ data1.value }}</b-button
-        >
-      </template> -->
       <template #head(status2)>
         <b-form-group
           label="Status2"
@@ -165,7 +153,7 @@
         </b-form-group>
       </template>
       <template #cell(status2)="data4">
-        <p :style="{color:changeStatusState(data4.value)}">
+        <p :style="{ color: changeStatusState(data4.value) }">
           {{ data4.value }}
         </p>
       </template>
@@ -200,7 +188,7 @@
 
           <b-row class="mb-2">
             <b-col sm="3" class="text-sm-right"><b>Status:</b></b-col>
-            <b-col>{{row.item.status2 }}</b-col>
+            <b-col>{{ row.item.status2 }}</b-col>
           </b-row>
           <b-button size="sm" @click="row.toggleDetails">Hide Details</b-button>
         </b-card>
@@ -213,64 +201,47 @@
 <script>
 export default {
   name: "IndexPage",
-  head:{
-    title:'Task List'
+  head: {
+    title: "Task List",
   },
-  // asyncData(context){
-  //   console.log(context)
-  //   return new Promise((resolve, reject)=>{
-  //     setTimeout(()=>{
-  //       resolve({
-  //         items:[
-  //         { todo: "english", status: false, description: "hihi" },
-  //         { todo: "math", status: true, description: "do it" },
-  //         { todo: "physics", status: false, description: "physics desc" },
-  //         ]
-  //       })
-  //     }, 1500)
-  //     }).then((data)=>{
-  //       return data
-  //     }).catch((e)=>{
-  //       console.log(e)
-  //   })
-  // },
   data() {
     return {
-      // keyword:'',
+      indexRowDetail: 0,
+      isStatusState: false,
+      title: "",
+      name: "",
+      nameState: null,
       isSorted: false,
       checked: false,
       todoValue: "",
       descriptionValue: "",
-      // isComplete: false,
       isModal: false,
       background: "light",
-      // bgStatus: "",
       isValidTodo: null,
       isValidDes: null,
       todoSearch: null,
-      // statusSearchInput: '',
-      status2SearchInput:null,
+      status2SearchInput: null,
       filterCol: ["todo"],
       isColFilter: false,
       curIndex: 0,
       selected: null,
-      options:[
+      options: [
         {
           value: null,
-          text: 'Choose status for your task'
+          text: "Choose status for your task",
         },
         {
-          value: 'New',
-          text: 'New'
+          value: "New",
+          text: "New",
         },
         {
           value: "Inprogress",
-          text: "Inprogress"
+          text: "Inprogress",
         },
         {
           value: "Done",
-          text: "Done"
-        }
+          text: "Done",
+        },
       ],
       fields: [
         {
@@ -279,17 +250,10 @@ export default {
           formatter: "",
           sortable: true,
         },
-        // {
-        //   key: "status",
-        //   label: "Status",
-        //   formatter: (value) => {
-        //     return value ? "Done" : "Incomplete";
-        //   },
-        //   sortable: true,
-        // },
         {
           key: "status2",
-          label: "Status2"
+          label: "Status2",
+          sortable: true,
         },
         {
           // A regular column with custom formatter
@@ -302,58 +266,36 @@ export default {
         },
       ],
       items: [
-        { todo: "english", status2: 'New', description: "hihi" },
-        { todo: "math", status2: 'Inprogress', description: "do it" },
-        { todo: "physics", status2: 'Done', description: "physics desc" },
+        {
+          todo: "english",
+          status2: "New",
+          description: "hihi",
+          _showDetails: false,
+        },
+        {
+          todo: "math",
+          status2: "Inprogress",
+          description: "do it",
+          _showDetails: false,
+        },
+        {
+          todo: "physics",
+          status2: "Done",
+          description: "physics desc",
+          _showDetails: false,
+        },
       ],
     };
   },
-  computed: {
-    validInput() {
-      return this.isValidDes && this.isValidTodo;
-    },
-    // dataArray(){
-    //   const str='incomplete'
-    //   const str2='done'
-    //   console.log(this.statusSearchInput)
-    //   if(str.includes(this.statusSearchInput.toLocaleLowerCase()) && str2.includes(this.statusSearchInput.toLocaleLowerCase())){
-    //     return this.items
-    //   }
-    //   if(str.includes(this.statusSearchInput)&&this.statusSearchInput!==''){
-    //     return this.items.filter(item=>item.status===false)
-    //   }
-    //   if(str2.includes(this.statusSearchInput)&&this.statusSearchInput !==''){
-    //     return this.items.filter(item=>item.status===true)
-    //   }
-    //   if(!str.includes(this.statusSearchInput)||!str2.includes(this.statusSearchInput)){
-    //     return []
-    //   }
-    //   if(this.statusSearchInput===''){
-    //     return this.items
-    //   }
-    // },
-  },
+  // mounted() {
+  //   setTimeout(() => {
+  //     this.items = [
+
+  //     ];
+  //   }, 1000);
+  // },
+  computed: {},
   methods: {
-    onModal(ref) {
-      if (ref === "modal1") {
-        const data = {
-          todo: this.todoValue,
-          status2:this.selected,
-          description: this.descriptionValue,
-        };
-        this.items = [...this.items, data];
-        this.toast("b-toaster-top-center", "success");
-      } else {
-        this.updateTodo();
-      }
-      // console.log(ref);
-    },
-    // onStatus(index) {
-    //   this.items[index].status = !this.items[index].status;
-    // },
-    // updateStatus: (state) => {
-    //   return state ? "Done" : "Incomplete";
-    // },
     onDelete(index) {
       this.items = this.items.filter((item, i) => {
         return i != index;
@@ -362,7 +304,10 @@ export default {
     resetInfoModal() {
       this.todoValue = "";
       this.descriptionValue = "";
-      this.selected=null;
+      this.selected = null;
+      this.isValidDes = null;
+      this.isValidTodo = null;
+      this.isStatusState = false;
     },
     onEdit(item, index, button) {
       this.curIndex = index;
@@ -370,7 +315,8 @@ export default {
       this.descriptionValue = item.description;
       this.selected = item.status2;
       this.isModal = false;
-      console.log("when click edit icon: ", this.isModal);
+      this.title = "Edit todo";
+      console.log("when click edit icon: ", item);
     },
     updateTodo() {
       this.items[this.curIndex].todo = this.todoValue;
@@ -384,7 +330,7 @@ export default {
     },
     changeWidthCol(key) {
       if (key === "todo") return "90px";
-      if (key === "status2") return "60px"
+      if (key === "status2") return "60px";
       if (key === "delete" || key === "edit") return "20px";
     },
     toast(toaster, variant = null, append = false) {
@@ -397,28 +343,37 @@ export default {
         autoHideDelay: 1000,
       });
     },
-    changeBgStatus(statusState) {
-      return statusState ? "success" : "danger";
-    },
+    // changeBgStatus(statusState) {
+    //   return statusState ? "success" : "danger";
+    // },
     inputTodoState() {
-      // console.log(1, this.isValidTodo);
-      if (this.todoValue.length === 0) return (this.isValidTodo = null);
-      else if (this.todoValue.length < 3 || this.todoValue.length > 50)
-        return (this.isValidTodo = false);
+      let format = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+      if (this.todoValue.length === 0) this.isValidTodo = null;
+      else if (
+        this.todoValue.length < 3 ||
+        this.todoValue.length > 20 ||
+        format.test(this.todoValue)
+      )
+        this.isValidTodo = false;
       else this.isValidTodo = true;
-      return this.isValidTodo;
     },
     inputDescState() {
-      if (this.descriptionValue.length == 0) return (this.isValidDes = null);
-      if (this.descriptionValue.length > 150) return (this.isValidDes = false);
+      let format = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+      if (this.descriptionValue.length === 0) this.isValidDes = false;
+      else if (
+        this.descriptionValue.length < 3 ||
+        this.descriptionValue.length > 100 ||
+        format.test(this.descriptionValue)
+      )
+        this.isValidDes = false;
       else this.isValidDes = true;
-      return this.isValidDes;
     },
     changeModal() {
       return this.isModal ? "modal1" : "modal2";
     },
     changeIsModalAdd() {
       this.isModal = true;
+      this.title = "Add todo";
       console.log("when click add button", this.isModal);
     },
     onTodoSearch() {
@@ -436,11 +391,10 @@ export default {
     },
     changeSearchField() {
       if (this.isColFilter) {
-        this.filterCol[0] = "todo";
+        return ["todo"];
       } else {
-        this.filterCol[0] = "status2";
+        return ["status2"];
       }
-      return this.filterCol;
     },
     setIsStatus2Filter() {
       this.isColFilter = false;
@@ -448,17 +402,91 @@ export default {
     setIsTodoFilter() {
       this.isColFilter = true;
     },
-    changeStatusState(val){
-      if(val==='Done'){
-        return 'green'
+    changeStatusState(val) {
+      if (val === "Done") {
+        return "green";
       }
-      if(val==='Inprogress'){
-        return 'orange'
+      if (val === "Inprogress") {
+        return "orange";
       }
-      if(val==='New'){
-        return 'red'
+      if (val === "New") {
+        return "red";
       }
-    }
+    },
+
+    checkFormValidity() {
+      console.log("Prinnttt: ", this.isValidTodo);
+      const valid = this.$refs.form.checkValidity();
+      this.isValidTodo = valid;
+      this.isValidDes = valid;
+      if (this.selected == null) this.isStatusState = true;
+      else this.isStatusState = false;
+      // let format = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+      // if (this.todoValue.length === 0) this.isValidTodo = false;
+      // else if (
+      //   this.todoValue.length < 3 ||
+      //   this.todoValue.length > 20 ||
+      //   format.test(this.todoValue)
+      // )
+      //   this.isValidTodo = false;
+      // else this.isValidTodo = true;
+
+      // if (this.descriptionValue.length === 0) this.isValidDes = false;
+      // else if (
+      //   this.descriptionValue.length < 3 ||
+      //   this.descriptionValue.length > 100 ||
+      //   format.test(this.descriptionValue)
+      // )
+      //   this.isValidDes = false;
+      // else this.isValidDes = true;
+      return valid && this.isValidDes && this.isValidTodo;
+    },
+    handleOk(bvModalEvent, ref) {
+      // Prevent modal from closing
+      bvModalEvent.preventDefault();
+      // Trigger submit handler
+      this.handleSubmit(ref);
+      console.log(bvModalEvent);
+    },
+    handleSubmit(ref) {
+      // Exit when the form isn't valid
+      if (!this.checkFormValidity()) {
+        return;
+      }
+      // Push the new data row
+      if (ref === "modal1") {
+        const data = {
+          todo: this.todoValue,
+          status2: this.selected,
+          description: this.descriptionValue,
+          _showDetails: false,
+        };
+        this.items.push(data);
+        this.toast("b-toaster-top-center", "success");
+      } else {
+        this.updateTodo();
+      }
+      // Hide the modal manually
+      this.$nextTick(() => {
+        this.$bvModal.hide("modal-1");
+      });
+    },
+    nameKeydown(e) {
+      if (this.todoValue.length === 0) this.isValidTodo = null;
+    },
+    descKeyDown(e) {
+      if (this.descriptionValue.length === 0) this.isValidDes = null;
+    },
+    checkShowDetails(index, showDetailState) {
+      console.log('in check detail: ', this.items[index].description)
+      this.items[this.indexRowDetail]._showDetails = false;
+      this.indexRowDetail = index;
+      if (showDetailState) {
+        this.items[index]._showDetails = false;
+      } else {
+        this.items[index]._showDetails = true;
+      }
+    },
   },
 };
 </script>
@@ -511,5 +539,4 @@ export default {
   background-color: rgba(39, 37, 37, 0.705);
   color: #ffffff;
 }
-
 </style>
