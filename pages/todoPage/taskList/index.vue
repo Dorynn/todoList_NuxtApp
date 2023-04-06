@@ -2,7 +2,11 @@
   <div id="homePage">
     <h1 class="title">Todo List</h1>
     <div class="control">
-      <b-button v-b-modal.modal-1 variant="success" @click="changeIsModalAdd"
+      <b-button
+        v-b-modal.modal-1
+        variant="success"
+        @click="changeIsModalAdd"
+        class="padding-btn"
         >Add</b-button
       >
       <b-modal
@@ -17,7 +21,7 @@
             id="input-todo"
             label="Task"
             label-for="input-todo-content"
-            invalid-feedback="Your task shouldn't have special key like @,/..., require content length about 3 to 20 letters"
+            :invalid-feedback="changeInvalidFeedback()"
             :state="isValidTodo"
           >
             <b-form-input
@@ -27,22 +31,26 @@
               :state="isValidTodo"
               @keydown="nameKeydown($event)"
               required
-              @blur="inputTodoState()"
-
+              @blur="inputTodoBlur()"
             ></b-form-input>
           </b-form-group>
           <b-form-group label="Status">
-            <b-form-select v-model="selected" :options="options" required>
-            </b-form-select>
-            <small v-show="isStatusState" style="color: red"
-              >Must choose one status</small
+            <b-form-select
+              v-model="selected"
+              :options="options"
+              required
+              @change="inputStatusBlur()"
             >
+            </b-form-select>
+            <small v-show="isStatusState" style="color: red">{{
+              changeInvalidFeedback()
+            }}</small>
           </b-form-group>
           <b-form-group
             id="input-description"
             label="Description"
             label-for="input-default"
-            invalid-feedback="Description should not over 100 letter and contain special key (@, /, ....)"
+            :invalid-feedback="changeInvalidFeedback()"
             :state="isValidDes"
           >
             <b-form-textarea
@@ -51,9 +59,8 @@
               v-model.trim="descriptionValue"
               :state="isValidDes"
               @input="descKeyDown($event)"
-              @blur="inputDescState()"
+              @blur="inputDescBlur()"
               required
-              
             ></b-form-textarea>
           </b-form-group>
         </form>
@@ -76,7 +83,7 @@
       :filter="changeSearchParams()"
       :filter-included-fields="changeSearchField()"
       :table-variant="background"
-      :no-sort-reset="false"
+      :no-sort-reset="true"
       show-empty
       bordered
       table-class="w-50"
@@ -85,6 +92,10 @@
       striped
       fixed
       thead-class="thead-primary"
+      :busy="isBusy"
+      v-click-outside="onClickOutside"
+      :tbody-transition-props="transProps"
+      :sort-by.sync="sortState"
     >
       <template #table-colgroup="scope">
         <col
@@ -99,6 +110,12 @@
       <template #emptyfiltered="scope">
         <h5>{{ scope.emptyFilteredText }}</h5>
       </template>
+      <template #table-busy>
+        <div class="text-center text-danger my-2">
+          <b-spinner class="align-middle"></b-spinner>
+          <strong>Loading...</strong>
+        </div>
+      </template>
       <template #head(todo)>
         <b-form-group
           label="Todo"
@@ -106,7 +123,7 @@
           label-cols-sm="2"
           label-align-sm="left"
           label-size="sm"
-          class="mb-0"
+          class="mb-0 headTodo"
           style="text-align: center"
         >
           <b-input-group size="sm" class="">
@@ -133,9 +150,9 @@
       </template>
       <template #head(status2)>
         <b-form-group
-          label="Status2"
+          label="Status"
           label-for="filter-input"
-          label-cols-sm="2"
+          label-cols-sm="3"
           label-align-sm="left"
           label-size="sm"
           class="mb-0"
@@ -158,21 +175,26 @@
         </p>
       </template>
       <template #cell(edit)="data2">
-        <font-awesome-icon
-          :icon="['fas', 'pen-to-square']"
+        <div
+          v-b-tooltip.hover
+          title="Click to edit this task!"
+          class="iconBtn"
           @click="onEdit(data2.item, data2.index, $event.target)"
-          class="delBtn"
+          id="editBtn"
           v-b-modal.modal-1
-          v-tooltip.hover="'Click to edit this task!'"
-        />
+        >
+          <font-awesome-icon :icon="['fas', 'pen-to-square']" />
+        </div>
       </template>
       <template #cell(delete)="data3">
-        <font-awesome-icon
-          :icon="['fas', 'trash-can']"
+        <div
           @click="onDelete(data3.index)"
-          class="delBtn"
+          id="deleteBtn"
+          class="iconBtn"
           v-tooltip.hover="'Click to delete this task!'"
-        />
+        >
+          <font-awesome-icon :icon="['fas', 'trash-can']" />
+        </div>
       </template>
 
       <template #row-details="row">
@@ -199,6 +221,7 @@
 </template>
 
 <script>
+import vClickOutside from "v-click-outside";
 export default {
   name: "IndexPage",
   head: {
@@ -206,6 +229,9 @@ export default {
   },
   data() {
     return {
+      sortState: null,
+      checkDuplicate: false,
+      isBusy: true,
       indexRowDetail: 0,
       isStatusState: false,
       title: "",
@@ -225,6 +251,10 @@ export default {
       isColFilter: false,
       curIndex: 0,
       selected: null,
+      transProps: {
+        // Transition name
+        name: "flip-list",
+      },
       options: [
         {
           value: null,
@@ -266,6 +296,33 @@ export default {
         },
       ],
       items: [
+        // {
+        //   todo: "english",
+        //   status2: "New",
+        //   description: "hihi",
+        //   _showDetails: false,
+        // },
+        // {
+        //   todo: "math",
+        //   status2: "Inprogress",
+        //   description: "do it",
+        //   _showDetails: false,
+        // },
+        // {
+        //   todo: "physics",
+        //   status2: "Done",
+        //   description: "physics desc",
+        //   _showDetails: false,
+        // },
+      ],
+    };
+  },
+  beforeMount() {
+    // this.isBusy = true;
+  },
+  mounted() {
+    setTimeout(() => {
+      this.items = [
         {
           todo: "english",
           status2: "New",
@@ -284,17 +341,14 @@ export default {
           description: "physics desc",
           _showDetails: false,
         },
-      ],
-    };
+      ];
+      this.isBusy = false;
+    }, 1000);
   },
-  // mounted() {
-  //   setTimeout(() => {
-  //     this.items = [
-
-  //     ];
-  //   }, 1000);
-  // },
   computed: {},
+  directives: {
+    clickOutside: vClickOutside.directive,
+  },
   methods: {
     onDelete(index) {
       this.items = this.items.filter((item, i) => {
@@ -343,9 +397,6 @@ export default {
         autoHideDelay: 1000,
       });
     },
-    // changeBgStatus(statusState) {
-    //   return statusState ? "success" : "danger";
-    // },
     inputTodoState() {
       let format = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
       if (this.todoValue.length === 0) this.isValidTodo = null;
@@ -356,10 +407,46 @@ export default {
       )
         this.isValidTodo = false;
       else this.isValidTodo = true;
+
+    },
+    inputTodoBlur(){
+      this.inputTodoState();
+      this.inputStatusState();
+      this.inputDescState();
+      if(this.isValidTodo){
+        this.checkDuplicateData();
+        if(this.checkDuplicate){
+          this.isValidTodo = false;
+          this.isValidDes = false;
+          this.isStatusState = true;
+        }
+      }
+    },
+    inputStatusState() {
+      if (this.selected == null) {
+        this.isStatusState = true;
+      }else{
+        this.isStatusState = false;
+      }
+    },
+    inputStatusBlur(){
+      this.inputTodoState();
+      this.inputStatusState();
+      this.inputDescState();
+      
+      if(!this.isStatusState || this.selected==null){
+        this.checkDuplicateData();
+        if(this.checkDuplicate){
+          this.isStatusState = true;
+          this.isValidDes = false;
+          this.isValidTodo = false;
+        }
+      }
     },
     inputDescState() {
+
       let format = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
-      if (this.descriptionValue.length === 0) this.isValidDes = false;
+      if (this.descriptionValue.length === 0) this.isValidDes = null;
       else if (
         this.descriptionValue.length < 3 ||
         this.descriptionValue.length > 100 ||
@@ -367,6 +454,21 @@ export default {
       )
         this.isValidDes = false;
       else this.isValidDes = true;
+      
+
+    },
+    inputDescBlur(){
+      this.inputTodoState();
+      this.inputStatusState();
+      this.inputDescState();
+      if(this.isValidDes){
+        this.checkDuplicateData()
+        if(this.checkDuplicate){
+          this.isValidDes = false;
+          this.isValidTodo = false;
+          this.isStatusState = true;
+        }
+      }
     },
     changeModal() {
       return this.isModal ? "modal1" : "modal2";
@@ -421,27 +523,11 @@ export default {
       this.isValidDes = valid;
       if (this.selected == null) this.isStatusState = true;
       else this.isStatusState = false;
-      // let format = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
-      // if (this.todoValue.length === 0) this.isValidTodo = false;
-      // else if (
-      //   this.todoValue.length < 3 ||
-      //   this.todoValue.length > 20 ||
-      //   format.test(this.todoValue)
-      // )
-      //   this.isValidTodo = false;
-      // else this.isValidTodo = true;
-
-      // if (this.descriptionValue.length === 0) this.isValidDes = false;
-      // else if (
-      //   this.descriptionValue.length < 3 ||
-      //   this.descriptionValue.length > 100 ||
-      //   format.test(this.descriptionValue)
-      // )
-      //   this.isValidDes = false;
-      // else this.isValidDes = true;
       return valid && this.isValidDes && this.isValidTodo;
     },
     handleOk(bvModalEvent, ref) {
+      let editButton = document.getElementById("editBtn");
+      editButton.focus({ focusVisible: false });
       // Prevent modal from closing
       bvModalEvent.preventDefault();
       // Trigger submit handler
@@ -478,7 +564,7 @@ export default {
       if (this.descriptionValue.length === 0) this.isValidDes = null;
     },
     checkShowDetails(index, showDetailState) {
-      console.log('in check detail: ', this.items[index].description)
+      console.log("in check detail: ", this.items[index].description);
       this.items[this.indexRowDetail]._showDetails = false;
       this.indexRowDetail = index;
       if (showDetailState) {
@@ -486,6 +572,34 @@ export default {
       } else {
         this.items[index]._showDetails = true;
       }
+    },
+    checkDuplicateData() {
+      this.checkDuplicate = false;
+      this.items.forEach((item) => {
+        console.log(item, item.todo, this.todoValue);
+        if (
+          item.todo == this.todoValue &&
+          item.status2 == this.selected &&
+          item.description == this.descriptionValue
+        ) {
+          this.checkDuplicate = true;
+        }
+      });
+    },
+    changeInvalidFeedback(id) {
+      if (this.checkDuplicate) return "Duplicate data, please check again!";
+      else {
+        if (id == "input-todo")
+          return "Your task shouldn't have special key like @,/..., require content length about 3 to 20 letters";
+        else if(id == 'input-default')
+          return "Description should not over 100 letter and contain special key (@, /, ....)";
+        else
+          return "Choose one status, please!"
+      }
+    },
+    onClickOutside(event) {
+      this.sortState = null
+      console.log('sortState:',this.sortState)
     },
   },
 };
@@ -530,13 +644,20 @@ export default {
     }
   }
 }
-
-.delBtn:hover {
+.iconBtn:hover {
   cursor: pointer;
+}
+#editBtn {
+  &:focus {
+    outline: none;
+  }
 }
 
 .thead-primary {
   background-color: rgba(39, 37, 37, 0.705);
   color: #ffffff;
+}
+.taskTable .flip-list-move {
+  transition: transform 1s;
 }
 </style>

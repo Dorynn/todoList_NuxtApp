@@ -26,6 +26,8 @@ export default {
   plugins: [
     {src:'~/plugins/toast_notif.js', mode:'client'},
     {src:'~/plugins/v-tooltip.js', mode:'client'},
+    {src:'~/plugins/click_outside.js', mode:'client'},
+
 
   ],
 
