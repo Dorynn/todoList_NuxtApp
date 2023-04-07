@@ -11,9 +11,9 @@
       >
       <b-modal
         id="modal-1"
-        :ref="changeModal()"
+        :ref="changeModal"
         :title="title"
-        @ok="handleOk($event, changeModal())"
+        @ok="handleOk($event, changeModa)"
         @hidden="resetInfoModal"
       >
         <form ref="form" @submit.stop.prevent="handleSubmit">
@@ -80,8 +80,8 @@
     <b-table
       :fields="fields"
       :items="items"
-      :filter="changeSearchParams()"
-      :filter-included-fields="changeSearchField()"
+      :filter="changeSearchParams"
+      :filter-included-fields="changeSearchField"
       :table-variant="background"
       :no-sort-reset="true"
       show-empty
@@ -94,7 +94,6 @@
       thead-class="thead-primary"
       :busy="isBusy"
       v-click-outside="onClickOutside"
-      :tbody-transition-props="transProps"
       :sort-by.sync="sortState"
     >
       <template #table-colgroup="scope">
@@ -188,7 +187,7 @@
       </template>
       <template #cell(delete)="data3">
         <div
-          @click="onDelete(data3.index)"
+          @click="DELETE_TASK(data3.index)"
           id="deleteBtn"
           class="iconBtn"
           v-tooltip.hover="'Click to delete this task!'"
@@ -222,6 +221,7 @@
 
 <script>
 import vClickOutside from "v-click-outside";
+import { mapGetters, mapMutations } from "vuex";
 export default {
   name: "IndexPage",
   head: {
@@ -295,66 +295,45 @@ export default {
           label: "Delete",
         },
       ],
-      items: [
-        // {
-        //   todo: "english",
-        //   status2: "New",
-        //   description: "hihi",
-        //   _showDetails: false,
-        // },
-        // {
-        //   todo: "math",
-        //   status2: "Inprogress",
-        //   description: "do it",
-        //   _showDetails: false,
-        // },
-        // {
-        //   todo: "physics",
-        //   status2: "Done",
-        //   description: "physics desc",
-        //   _showDetails: false,
-        // },
-      ],
     };
   },
-  beforeMount() {
-    // this.isBusy = true;
+  computed: {
+    ...mapGetters(["items"]),
+    changeSearchField() {
+      if (this.isColFilter) {
+        return ["todo"];
+      } else {
+        return ["status2"];
+      }
+    },
+    changeSearchParams() {
+      if (this.isColFilter) {
+        return this.todoSearch;
+      } else {
+        console.log("this is statusSearchInput: ", this.status2SearchInput);
+        return this.status2SearchInput;
+      }
+    },
+    changeModal() {
+      return this.isModal ? "modal1" : "modal2";
+    },
   },
   mounted() {
     setTimeout(() => {
-      this.items = [
-        {
-          todo: "english",
-          status2: "New",
-          description: "hihi",
-          _showDetails: false,
-        },
-        {
-          todo: "math",
-          status2: "Inprogress",
-          description: "do it",
-          _showDetails: false,
-        },
-        {
-          todo: "physics",
-          status2: "Done",
-          description: "physics desc",
-          _showDetails: false,
-        },
-      ];
+      this.items;
       this.isBusy = false;
     }, 1000);
   },
-  computed: {},
   directives: {
     clickOutside: vClickOutside.directive,
   },
   methods: {
-    onDelete(index) {
-      this.items = this.items.filter((item, i) => {
-        return i != index;
-      });
-    },
+    ...mapMutations([
+      "DELETE_TASK",
+      "ADD_TASK",
+      "EDIT_TASK",
+      "CHECK_SHOW_ROW_DETAIL",
+    ]),
     resetInfoModal() {
       this.todoValue = "";
       this.descriptionValue = "";
@@ -363,7 +342,7 @@ export default {
       this.isValidTodo = null;
       this.isStatusState = false;
     },
-    onEdit(item, index, button) {
+    onEdit(item, index) {
       this.curIndex = index;
       this.todoValue = item.todo;
       this.descriptionValue = item.description;
@@ -371,13 +350,6 @@ export default {
       this.isModal = false;
       this.title = "Edit todo";
       console.log("when click edit icon: ", item);
-    },
-    updateTodo() {
-      this.items[this.curIndex].todo = this.todoValue;
-      this.items[this.curIndex].description = this.descriptionValue;
-      this.items[this.curIndex].status2 = this.selected;
-      console.log("pluginnnnn: ", this.$toast);
-      this.$toast.success("Edit successfully!");
     },
     changeBackground() {
       this.checked ? (this.background = "dark") : (this.background = "light");
@@ -407,15 +379,14 @@ export default {
       )
         this.isValidTodo = false;
       else this.isValidTodo = true;
-
     },
-    inputTodoBlur(){
+    inputTodoBlur() {
       this.inputTodoState();
       this.inputStatusState();
       this.inputDescState();
-      if(this.isValidTodo){
+      if (this.isValidTodo) {
         this.checkDuplicateData();
-        if(this.checkDuplicate){
+        if (this.checkDuplicate) {
           this.isValidTodo = false;
           this.isValidDes = false;
           this.isStatusState = true;
@@ -425,18 +396,18 @@ export default {
     inputStatusState() {
       if (this.selected == null) {
         this.isStatusState = true;
-      }else{
+      } else {
         this.isStatusState = false;
       }
     },
-    inputStatusBlur(){
+    inputStatusBlur() {
       this.inputTodoState();
       this.inputStatusState();
       this.inputDescState();
-      
-      if(!this.isStatusState || this.selected==null){
+
+      if (!this.isStatusState || this.selected == null) {
         this.checkDuplicateData();
-        if(this.checkDuplicate){
+        if (this.checkDuplicate) {
           this.isStatusState = true;
           this.isValidDes = false;
           this.isValidTodo = false;
@@ -444,7 +415,6 @@ export default {
       }
     },
     inputDescState() {
-
       let format = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
       if (this.descriptionValue.length === 0) this.isValidDes = null;
       else if (
@@ -454,49 +424,24 @@ export default {
       )
         this.isValidDes = false;
       else this.isValidDes = true;
-      
-
     },
-    inputDescBlur(){
+    inputDescBlur() {
       this.inputTodoState();
       this.inputStatusState();
       this.inputDescState();
-      if(this.isValidDes){
-        this.checkDuplicateData()
-        if(this.checkDuplicate){
+      if (this.isValidDes) {
+        this.checkDuplicateData();
+        if (this.checkDuplicate) {
           this.isValidDes = false;
           this.isValidTodo = false;
           this.isStatusState = true;
         }
       }
     },
-    changeModal() {
-      return this.isModal ? "modal1" : "modal2";
-    },
     changeIsModalAdd() {
       this.isModal = true;
       this.title = "Add todo";
       console.log("when click add button", this.isModal);
-    },
-    onTodoSearch() {
-      this.items = this.items.filter((item) => {
-        return item.todo === this.todoSearch;
-      });
-    },
-    changeSearchParams() {
-      if (this.isColFilter) {
-        return this.todoSearch;
-      } else {
-        console.log("this is statusSearchInput: ", this.status2SearchInput);
-        return this.status2SearchInput;
-      }
-    },
-    changeSearchField() {
-      if (this.isColFilter) {
-        return ["todo"];
-      } else {
-        return ["status2"];
-      }
     },
     setIsStatus2Filter() {
       this.isColFilter = false;
@@ -515,7 +460,6 @@ export default {
         return "red";
       }
     },
-
     checkFormValidity() {
       console.log("Prinnttt: ", this.isValidTodo);
       const valid = this.$refs.form.checkValidity();
@@ -547,10 +491,19 @@ export default {
           description: this.descriptionValue,
           _showDetails: false,
         };
-        this.items.push(data);
+        this.$store.commit("ADD_TASK", data);
         this.toast("b-toaster-top-center", "success");
       } else {
-        this.updateTodo();
+        console.log(this);
+        this.$store.commit({
+          type: "EDIT_TASK",
+          id: this.curIndex,
+          task: this.todoValue,
+          desc: this.descriptionValue,
+          status: this.selected,
+        });
+
+        this.$toast.success("Edit successfully!");
       }
       // Hide the modal manually
       this.$nextTick(() => {
@@ -564,19 +517,15 @@ export default {
       if (this.descriptionValue.length === 0) this.isValidDes = null;
     },
     checkShowDetails(index, showDetailState) {
-      console.log("in check detail: ", this.items[index].description);
-      this.items[this.indexRowDetail]._showDetails = false;
-      this.indexRowDetail = index;
-      if (showDetailState) {
-        this.items[index]._showDetails = false;
-      } else {
-        this.items[index]._showDetails = true;
-      }
+      this.$store.commit({
+        type: "CHECK_SHOW_ROW_DETAIL",
+        idRowCurrent: index,
+        statusShowDetail: showDetailState,
+      });
     },
     checkDuplicateData() {
       this.checkDuplicate = false;
       this.items.forEach((item) => {
-        console.log(item, item.todo, this.todoValue);
         if (
           item.todo == this.todoValue &&
           item.status2 == this.selected &&
@@ -591,15 +540,13 @@ export default {
       else {
         if (id == "input-todo")
           return "Your task shouldn't have special key like @,/..., require content length about 3 to 20 letters";
-        else if(id == 'input-default')
+        else if (id == "input-default")
           return "Description should not over 100 letter and contain special key (@, /, ....)";
-        else
-          return "Choose one status, please!"
+        else return "Choose one status, please!";
       }
     },
-    onClickOutside(event) {
-      this.sortState = null
-      console.log('sortState:',this.sortState)
+    onClickOutside() {
+      this.sortState = null;
     },
   },
 };
@@ -656,8 +603,5 @@ export default {
 .thead-primary {
   background-color: rgba(39, 37, 37, 0.705);
   color: #ffffff;
-}
-.taskTable .flip-list-move {
-  transition: transform 1s;
 }
 </style>

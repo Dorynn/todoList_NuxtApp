@@ -5,24 +5,25 @@
       <h4>Other user</h4>
       <div class="listUser">
         <img
-          :src="images[Math.floor(Math.random() * 9) + userID].url"
+        :src="images[Math.floor(Math.random() * 9) + userID].url"
           alt=""
           class="user id1"
           @click="showProfile"
         />
         <img
-          :src="images[Math.floor(Math.random() * 9) + userID].url"
+        :src="images[Math.floor(Math.random() * 9) + userID].url"
           alt=""
           class="user id2"
           @click="showProfile"
         />
       </div>
+      <p>{{ images[userID].url }}</p>
     </div>
   </div>
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 
 export default {
   head() {
@@ -43,15 +44,25 @@ export default {
       userID: 0,
     };
   },
+  async fetch ({store}){
+    await store.dispatch('getImages');
+    // await store.dispatch('getUsersInfo');
+  },
+  // created(){
+  //   this.$store.dispatch('images/fetchData')
+  //   this.$store.dispatch('users/fetchData')
+  // },
   methods: {
     showProfile() {
+      console.log('image...',this.images)
       this.userID = Math.floor(Math.random() * 9);
       this.$router.push(`/todoPage/userProfile/user${this.userID}`);
       console.log("active");
     },
+
   },
   computed: {
-    ...mapGetters(["images"]),
+    ...mapGetters(['images']),
   },
 };
 </script>

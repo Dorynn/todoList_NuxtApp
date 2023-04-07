@@ -4,8 +4,9 @@
       <b-row align-h="between" class="container">
         <b-col class="professionalDetail" cols="4">
           <h4 class="info">Professional Detail</h4>
+          <!-- :src="SET_IMAGES[userID].url" -->
           <img
-            :src="image[userID].url"
+            :src="images[userID].url"
             alt="avatar"
             class="avatar"
           />
@@ -67,14 +68,13 @@
           <hr>
           <!-- <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Recusandae soluta consectetur ipsam, quidem dolores neque eveniet veniam quae officiis aliquid sapiente omnis earum qui quasi, placeat, voluptate error! Non quo facere dolore tenetur quis adipisci?</p> -->
           <!-- <p>{{ descUser[userID] }}</p> -->
-          <p>{{ image[userID].title }}</p>
+          <!-- <p>{{ SET_IMAGES[userID].title }}</p> -->
         </b-col>
       </b-row>
     </div>
   </template>
   
   <script>
-import {mapState} from 'vuex';
 import { mapGetters } from 'vuex';
   export default {
     head(){
@@ -83,25 +83,17 @@ import { mapGetters } from 'vuex';
       }
     },
     props:{
-        users:Array,
+        users: Array,
         userID: {
           type:Number,
           default:0,
         }
     },
-    async fetch({$axios, store}){
-      let image = await $axios.$get('https://jsonplaceholder.typicode.com/photos');
-      store.commit('setImage', image);
-        // await store.dispatch('loadDescUser');
-    },
-    // async fetch({store}){
-
-    // },
+  //   async fetch ({store}){
+  //   await store.dispatch('users/fetchData');
+  // },
     computed: {
-      ...mapState({
-        image: 'images'
-      }),
-      // ...mapGetters(['descUser'])
+      ...mapGetters(['images'])
 
     }
 
