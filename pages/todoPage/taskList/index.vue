@@ -13,7 +13,7 @@
         id="modal-1"
         :ref="changeModal"
         :title="title"
-        @ok="handleOk($event, changeModa)"
+        @ok="handleOk($event, changeModal)"
         @hidden="resetInfoModal"
       >
         <form ref="form" @submit.stop.prevent="handleSubmit">
