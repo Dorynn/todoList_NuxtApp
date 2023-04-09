@@ -30,7 +30,7 @@
             >
           </b-nav-form>
           <!-- <nuxt-link to="/todoPage/userProfile"> Sign out </nuxt-link> -->
-
+          <switch-language/>
           <b-nav-item-dropdown right>
             <template #button-content> User </template>
             <b-dropdown-item href="">

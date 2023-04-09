@@ -69,6 +69,8 @@
           <!-- <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Recusandae soluta consectetur ipsam, quidem dolores neque eveniet veniam quae officiis aliquid sapiente omnis earum qui quasi, placeat, voluptate error! Non quo facere dolore tenetur quis adipisci?</p> -->
           <!-- <p>{{ descUser[userID] }}</p> -->
           <!-- <p>{{ SET_IMAGES[userID].title }}</p> -->
+    <p>{{ $t('welcome') }}</p>
+
         </b-col>
       </b-row>
     </div>

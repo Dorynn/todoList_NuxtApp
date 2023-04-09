@@ -1,12 +1,13 @@
 <template>
   <div id="root">
     <b-jumbotron
-      header="TODO LIST APP"
-      lead="Welcome everyone come here to using our app"
-      class="jumbotron"
+    header="TODO LIST APP"
+    lead="Welcome everyone come here to using our app"
+    class="jumbotron"
     >
-      <p>For more information visit website</p>
-      <!-- <p>{{ $store.state.name }}</p> -->
+    <p>For more information visit website</p>
+    <!-- <p>{{ $store.state.name }}</p> -->
+    <p>{{ $t('welcome') }}</p>
       <nuxt-link to="/todoPage/taskList">
         <b-button variant="primary">Click here</b-button>
       </nuxt-link>

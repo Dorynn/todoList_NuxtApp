@@ -1,5 +1,7 @@
 <template>
   <div id="homePage">
+    <p>{{ $t('welcome') }}</p>
+
     <h1 class="title">Todo List</h1>
     <div class="control">
       <b-button
