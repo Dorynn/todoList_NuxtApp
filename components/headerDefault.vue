@@ -33,12 +33,6 @@
 
           <b-nav-item-dropdown right>
             <template #button-content> User </template>
-
-            <!-- <b-dropdown-item href="#">
-              <nuxt-link to="/todoPage/userProfile/user1">
-                <font-awesome-icon :icon="['fas', 'user']" />
-              </nuxt-link>
-            </b-dropdown-item> -->
             <b-dropdown-item href="">
               <nuxt-link to="/todoPage/userProfile/user0"> Profile </nuxt-link>
             </b-dropdown-item>
