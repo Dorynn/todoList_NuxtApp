@@ -2,53 +2,68 @@
   <div id="homePage">
     <h1 class="title">Todo List</h1>
     <div class="control">
-      <b-button v-b-modal.modal-1 variant="success" @click="changeIsModalAdd"
+      <b-button
+        v-b-modal.modal-1
+        variant="success"
+        @click="changeIsModalAdd"
+        class="padding-btn"
         >Add</b-button
       >
       <b-modal
         id="modal-1"
-        :ref="changeModal()"
+        :ref="changeModal"
         :title="title"
-        @ok="onModal(changeModal())"
-        @hide="resetInfoModal"
-        :ok-disabled="!validInput"
+        @ok="handleOk($event, changeModa)"
+        @hidden="resetInfoModal"
       >
-        <b-form-group
-          id="input-todo"
-          label="Task"
-          label-for="input-todo-content"
-        >
-          <b-form-input
-            id="input-todo-content"
-            v-model="todoValue"
-            placeholder="Enter your task"
-            :state="inputTodoState()"
-            aria-describedby="input-1-live-feedback"
-          ></b-form-input>
-          <b-form-invalid-feedback id="input-1-live-feedback">
-            Enter at least 3 letters
-          </b-form-invalid-feedback>
-        </b-form-group>
-        <b-form-group label="Status">
-          <b-form-select v-model="selected" :options="options" ></b-form-select>
-        </b-form-group>
-        <b-form-group
-          id="input-description"
-          label="Description"
-          label-for="input-default"
-        >
-          <b-form-textarea
-            id="input-default"
-            placeholder="Enter task's description...."
-            v-model="descriptionValue"
-            :state="inputDescState()"
-            aria-describedby="input-2-live-feedback"
-          ></b-form-textarea>
-          <b-form-invalid-feedback id="input-2-live-feedback">
-            Enter maximum 100 letters
-          </b-form-invalid-feedback>
-        </b-form-group>
-
+        <form ref="form" @submit.stop.prevent="handleSubmit">
+          <b-form-group
+            id="input-todo"
+            label="Task"
+            label-for="input-todo-content"
+            :invalid-feedback="changeInvalidFeedback()"
+            :state="isValidTodo"
+          >
+            <b-form-input
+              id="input-todo-content"
+              v-model.trim="todoValue"
+              placeholder="Enter your task"
+              :state="isValidTodo"
+              @keydown="nameKeydown($event)"
+              required
+              @blur="inputTodoBlur()"
+            ></b-form-input>
+          </b-form-group>
+          <b-form-group label="Status">
+            <b-form-select
+              v-model="selected"
+              :options="options"
+              required
+              @change="inputStatusBlur()"
+            >
+            </b-form-select>
+            <small v-show="isStatusState" style="color: red">{{
+              changeInvalidFeedback()
+            }}</small>
+          </b-form-group>
+          <b-form-group
+            id="input-description"
+            label="Description"
+            label-for="input-default"
+            :invalid-feedback="changeInvalidFeedback()"
+            :state="isValidDes"
+          >
+            <b-form-textarea
+              id="input-default"
+              placeholder="Enter task's description...."
+              v-model.trim="descriptionValue"
+              :state="isValidDes"
+              @input="descKeyDown($event)"
+              @blur="inputDescBlur()"
+              required
+            ></b-form-textarea>
+          </b-form-group>
+        </form>
       </b-modal>
       <div>
         <b-form-checkbox
@@ -65,11 +80,12 @@
     <b-table
       :fields="fields"
       :items="items"
-      :filter="changeSearchParams()"
-      :filter-included-fields="changeSearchField()"
+      :filter="changeSearchParams"
+      :filter-included-fields="changeSearchField"
       :table-variant="background"
-      :no-sort-reset="false"
+      :no-sort-reset="true"
       :no-provider-sorting="true"
+      show-empty
       bordered
       table-class="w-50"
       class="taskTable"
@@ -77,6 +93,9 @@
       striped
       fixed
       thead-class="thead-primary"
+      :busy="isBusy"
+      v-click-outside="onClickOutside"
+      :sort-by.sync="sortState"
     >
       <template #table-colgroup="scope">
         <col
@@ -85,6 +104,18 @@
           :style="{ width: changeWidthCol(field.key) }"
         />
       </template>
+      <template #empty="scope">
+        <h5>{{ scope.emptyText }}</h5>
+      </template>
+      <template #emptyfiltered="scope">
+        <h5>{{ scope.emptyFilteredText }}</h5>
+      </template>
+      <template #table-busy>
+        <div class="text-center text-danger my-2">
+          <b-spinner class="align-middle"></b-spinner>
+          <strong>Loading...</strong>
+        </div>
+      </template>
       <template #head(todo)>
         <b-form-group
           label="Todo"
@@ -92,7 +123,7 @@
           label-cols-sm="2"
           label-align-sm="left"
           label-size="sm"
-          class="mb-0"
+          class="mb-0 headTodo"
           style="text-align: center"
         >
           <b-input-group size="sm" class="">
@@ -108,8 +139,8 @@
       </template>
       <template #cell(todo)="data">
         <p
-          @click="data.toggleDetails"
-          :class="{ active: data.item.status2==='Done' }"
+          @click="checkShowDetails(data.index, data.detailsShowing)"
+          :class="{ active: data.item.status2 === 'Done' }"
           class="todoContent"
           v-b-tooltip.hover
           title="Click to see details content"
@@ -117,33 +148,6 @@
           {{ data.value }}
         </p>
       </template>
-      <!-- <template #head(status)>
-        <b-form-group
-          label="Status"
-          label-for="filter-input-status"
-          label-cols-sm="3"
-          label-align-sm="right"
-          label-size="sm"
-          class="mb-0"
-        >
-          <b-input-group size="sm">
-            <b-form-input
-              id="filter-input-status"
-              v-model="statusSearchInput"
-              type="search"
-              placeholder="Type to Search"
-              @focus="setIsStatusFilter()"
-            ></b-form-input>
-          </b-input-group>
-        </b-form-group>
-      </template> -->
-      <!-- <template #cell(status)="data1">
-        <b-button
-          :variant="changeBgStatus(data1.item.status)"
-          @click="onStatus(data1.index)"
-          >{{ data1.value }}</b-button
-        >
-      </template> -->
       <template #head(status2)>
         <b-form-group
           label="Status"
@@ -166,26 +170,31 @@
         </b-form-group>
       </template>
       <template #cell(status2)="data4">
-        <p :style="{color:changeStatusState(data4.value)}">
+        <p :style="{ color: changeStatusState(data4.value) }">
           {{ data4.value }}
         </p>
       </template>
       <template #cell(edit)="data2">
-        <font-awesome-icon
-          :icon="['fas', 'pen-to-square']"
+        <div
+          v-b-tooltip.hover
+          title="Click to edit this task!"
+          class="iconBtn"
           @click="onEdit(data2.item, data2.index, $event.target)"
-          class="delBtn"
+          id="editBtn"
           v-b-modal.modal-1
-          v-tooltip.hover="'Click to edit this task!'"
-        />
+        >
+          <font-awesome-icon :icon="['fas', 'pen-to-square']" />
+        </div>
       </template>
       <template #cell(delete)="data3">
-        <font-awesome-icon
-          :icon="['fas', 'trash-can']"
-          @click="onDelete(data3.index)"
-          class="delBtn"
+        <div
+          @click="DELETE_TASK(data3.index)"
+          id="deleteBtn"
+          class="iconBtn"
           v-tooltip.hover="'Click to delete this task!'"
-        />
+        >
+          <font-awesome-icon :icon="['fas', 'trash-can']" />
+        </div>
       </template>
 
       <template #row-details="row">
@@ -201,7 +210,7 @@
 
           <b-row class="mb-2">
             <b-col sm="3" class="text-sm-right"><b>Status:</b></b-col>
-            <b-col>{{row.item.status2 }}</b-col>
+            <b-col>{{ row.item.status2 }}</b-col>
           </b-row>
           <b-button size="sm" @click="row.toggleDetails">Hide Details</b-button>
         </b-card>
@@ -212,70 +221,58 @@
 </template>
 
 <script>
+import vClickOutside from "v-click-outside";
+import { mapGetters, mapMutations } from "vuex";
 export default {
   name: "IndexPage",
-  head:{
-    title:'Task List'
+  head: {
+    title: "Task List",
   },
-  // asyncData(context){
-  //   console.log(context)
-  //   return new Promise((resolve, reject)=>{
-  //     setTimeout(()=>{
-  //       resolve({
-  //         items:[
-  //         { todo: "english", status: false, description: "hihi" },
-  //         { todo: "math", status: true, description: "do it" },
-  //         { todo: "physics", status: false, description: "physics desc" },
-  //         ]
-  //       })
-  //     }, 1500)
-  //     }).then((data)=>{
-  //       return data
-
-
-  //     }).catch((e)=>{
-  //       console.log(e)
-  //   })
-  // },
   data() {
     return {
-      // keyword:'',
-      filter:null,
-      title:"Add task",
+      sortState: null,
+      checkDuplicate: false,
+      isBusy: true,
+      indexRowDetail: 0,
+      isStatusState: false,
+      title: "",
+      name: "",
+      nameState: null,
       isSorted: false,
       checked: false,
       todoValue: "",
       descriptionValue: "",
-      // isComplete: false,
       isModal: false,
       background: "light",
-      // bgStatus: "",
       isValidTodo: null,
       isValidDes: null,
-      todoSearch: "",
-      // statusSearchInput: '',
-      status2SearchInput:"",
-      filterCol: [],
+      todoSearch: null,
+      status2SearchInput: null,
+      filterCol: ["todo"],
       isColFilter: false,
       curIndex: 0,
       selected: null,
-      options:[
+      transProps: {
+        // Transition name
+        name: "flip-list",
+      },
+      options: [
         {
           value: null,
-          text: 'Choose status for your task'
+          text: "Choose status for your task",
         },
         {
-          value: 'New',
-          text: 'New'
+          value: "New",
+          text: "New",
         },
         {
           value: "Inprogress",
-          text: "Inprogress"
+          text: "Inprogress",
         },
         {
           value: "Done",
-          text: "Done"
-        }
+          text: "Done",
+        },
       ],
       fields: [
         {
@@ -284,14 +281,6 @@ export default {
           formatter: "",
           sortable: true,
         },
-        // {
-        //   key: "status",
-        //   label: "Status",
-        //   formatter: (value) => {
-        //     return value ? "Done" : "Incomplete";
-        //   },
-        //   sortable: true,
-        // },
         {
           key: "status2",
           label: "Status2",
@@ -307,97 +296,68 @@ export default {
           label: "Delete",
         },
       ],
-      items: [
-        { todo: "english", status2: 'New', description: "hihi" },
-        { todo: "math", status2: 'Inprogress', description: "do it" },
-        { todo: "physics", status2: 'Done', description: "physics desc" },
-      ],
     };
   },
   computed: {
-    validInput() {
-      return this.isValidDes && this.isValidTodo && this.selected;
+    ...mapGetters(["items"]),
+    changeSearchField() {
+      if (this.isColFilter) {
+        return ["todo"];
+      } else {
+        return ["status2"];
+      }
     },
-    // changeSearchParams(){
-    //   if (this.isColFilter)
-    //     return this.todoSearch;
-    //   else
-    //     return this.status2SearchInput;
-    // }
-    // dataArray(){
-    //   const str='incomplete'
-    //   const str2='done'
-    //   console.log(this.statusSearchInput)
-    //   if(str.includes(this.statusSearchInput.toLocaleLowerCase()) && str2.includes(this.statusSearchInput.toLocaleLowerCase())){
-    //     return this.items
-    //   }
-    //   if(str.includes(this.statusSearchInput)&&this.statusSearchInput!==''){
-    //     return this.items.filter(item=>item.status===false)
-    //   }
-    //   if(str2.includes(this.statusSearchInput)&&this.statusSearchInput !==''){
-    //     return this.items.filter(item=>item.status===true)
-    //   }
-    //   if(!str.includes(this.statusSearchInput)||!str2.includes(this.statusSearchInput)){
-    //     return []
-    //   }
-    //   if(this.statusSearchInput===''){
-    //     return this.items
-    //   }
-    // },
+    changeSearchParams() {
+      if (this.isColFilter) {
+        return this.todoSearch;
+      } else {
+        console.log("this is statusSearchInput: ", this.status2SearchInput);
+        return this.status2SearchInput;
+      }
+    },
+    changeModal() {
+      return this.isModal ? "modal1" : "modal2";
+    },
+  },
+  mounted() {
+    setTimeout(() => {
+      this.items;
+      this.isBusy = false;
+    }, 1000);
+  },
+  directives: {
+    clickOutside: vClickOutside.directive,
   },
   methods: {
-    onModal(ref) {
-      if (ref === "modal1") {
-        const data = {
-          todo: this.todoValue,
-          status2:this.selected,
-          description: this.descriptionValue,
-        };
-        this.items = [...this.items, data];
-        this.toast("b-toaster-top-center", "success");
-      } else {
-        this.updateTodo();
-      }
-      // console.log(ref);
-    },
-    // onStatus(index) {
-    //   this.items[index].status = !this.items[index].status;
-    // },
-    // updateStatus: (state) => {
-    //   return state ? "Done" : "Incomplete";
-    // },
-    onDelete(index) {
-      this.items = this.items.filter((item, i) => {
-        return i != index;
-      });
-    },
+    ...mapMutations([
+      "DELETE_TASK",
+      "ADD_TASK",
+      "EDIT_TASK",
+      "CHECK_SHOW_ROW_DETAIL",
+    ]),
     resetInfoModal() {
       this.todoValue = "";
       this.descriptionValue = "";
-      this.selected=null;
+      this.selected = null;
+      this.isValidDes = null;
+      this.isValidTodo = null;
+      this.isStatusState = false;
     },
-    onEdit(item, index, button) {
+    onEdit(item, index) {
       this.curIndex = index;
       this.todoValue = item.todo;
       this.descriptionValue = item.description;
       this.selected = item.status2;
       this.isModal = false;
-      this.title="Edit task";
-      console.log("when click edit icon: ", this.isModal);
-    },
-    updateTodo() {
-      this.items[this.curIndex].todo = this.todoValue;
-      this.items[this.curIndex].description = this.descriptionValue;
-      this.items[this.curIndex].status2 = this.selected;
-      console.log("pluginnnnn: ", this.$toast);
-      this.$toast.success("Edit successfully!");
+      this.title = "Edit todo";
+      console.log("when click edit icon: ", item);
     },
     changeBackground() {
       this.checked ? (this.background = "dark") : (this.background = "light");
     },
     changeWidthCol(key) {
       if (key === "todo") return "90px";
-      if (key === "status2") return "70px"
+      if (key === "status2") return "60px";
       if (key === "delete" || key === "edit") return "20px";
     },
     toast(toaster, variant = null, append = false) {
@@ -410,62 +370,79 @@ export default {
         autoHideDelay: 1000,
       });
     },
-    changeBgStatus(statusState) {
-      return statusState ? "success" : "danger";
-    },
     inputTodoState() {
-      // console.log(1, this.isValidTodo);
-      if (this.todoValue.length === 0) return (this.isValidTodo = null);
-      else if (this.todoValue.length < 3 || this.todoValue.length > 50)
-        return (this.isValidTodo = false);
+      let format = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+      if (this.todoValue.length === 0) this.isValidTodo = null;
+      else if (
+        this.todoValue.length < 3 ||
+        this.todoValue.length > 20 ||
+        format.test(this.todoValue)
+      )
+        this.isValidTodo = false;
       else this.isValidTodo = true;
-      return this.isValidTodo;
+    },
+    inputTodoBlur() {
+      this.inputTodoState();
+      this.inputStatusState();
+      this.inputDescState();
+      if (this.isValidTodo) {
+        this.checkDuplicateData();
+        if (this.checkDuplicate) {
+          this.isValidTodo = false;
+          this.isValidDes = false;
+          this.isStatusState = true;
+        }
+      }
+    },
+    inputStatusState() {
+      if (this.selected == null) {
+        this.isStatusState = true;
+      } else {
+        this.isStatusState = false;
+      }
+    },
+    inputStatusBlur() {
+      this.inputTodoState();
+      this.inputStatusState();
+      this.inputDescState();
+
+      if (!this.isStatusState || this.selected == null) {
+        this.checkDuplicateData();
+        if (this.checkDuplicate) {
+          this.isStatusState = true;
+          this.isValidDes = false;
+          this.isValidTodo = false;
+        }
+      }
     },
     inputDescState() {
-      if (this.descriptionValue.length == 0) return (this.isValidDes = null);
-      if (this.descriptionValue.length > 150) return (this.isValidDes = false);
+      let format = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+      if (this.descriptionValue.length === 0) this.isValidDes = null;
+      else if (
+        this.descriptionValue.length < 3 ||
+        this.descriptionValue.length > 100 ||
+        format.test(this.descriptionValue)
+      )
+        this.isValidDes = false;
       else this.isValidDes = true;
-      return this.isValidDes;
     },
-    // inputStatusState(){
-    //   if(this.selected===null){
-    //     re
-    //   }
-    // },
-    changeModal() {
-      return this.isModal ? "modal1" : "modal2";
+    inputDescBlur() {
+      this.inputTodoState();
+      this.inputStatusState();
+      this.inputDescState();
+      if (this.isValidDes) {
+        this.checkDuplicateData();
+        if (this.checkDuplicate) {
+          this.isValidDes = false;
+          this.isValidTodo = false;
+          this.isStatusState = true;
+        }
+      }
     },
     changeIsModalAdd() {
-      this.isModal = true;  
-      this.title="Add task";
+      this.isModal = true;
+      this.title = "Add todo";
       console.log("when click add button", this.isModal);
-    },
-    // onTodoSearch() {
-    //   this.items = this.items.filter((item) => {
-    //     return item.todo === this.todoSearch;
-    //   });
-    // },
-    changeSearchParams() {
-      if (this.isColFilter) {
-        console.log("this is todoSearchInput: ", this.todoSearch);
-        return this.todoSearch;
-      }
-      if(this.isColFilter===false){
-        console.log("this is statusSearchInput: ", this.status2SearchInput);
-        return this.status2SearchInput;
-      }
-    },
-    changeSearchField() {
-      if (this.isColFilter) {
-        // this.filterCol[0] = 'todo';
-        return ['todo'];
-      } 
-      if(this.isColFilter==false) {
-        // this.filterCol[0] = 'status2';
-
-        return ['status2']
-      }
-      return this.filterCol;
     },
     setIsStatus2Filter() {
 
@@ -483,17 +460,105 @@ export default {
       //   this.isColFilter=false;
       // }
     },
-    changeStatusState(val){
-      if(val==='Done'){
-        return 'green'
+    changeStatusState(val) {
+      if (val === "Done") {
+        return "green";
       }
-      if(val==='Inprogress'){
-        return 'orange'
+      if (val === "Inprogress") {
+        return "orange";
       }
-      if(val==='New'){
-        return 'red'
+      if (val === "New") {
+        return "red";
       }
-    }
+    },
+    checkFormValidity() {
+      console.log("Prinnttt: ", this.isValidTodo);
+      const valid = this.$refs.form.checkValidity();
+      this.isValidTodo = valid;
+      this.isValidDes = valid;
+      if (this.selected == null) this.isStatusState = true;
+      else this.isStatusState = false;
+      return valid && this.isValidDes && this.isValidTodo;
+    },
+    handleOk(bvModalEvent, ref) {
+      let editButton = document.getElementById("editBtn");
+      editButton.focus({ focusVisible: false });
+      // Prevent modal from closing
+      bvModalEvent.preventDefault();
+      // Trigger submit handler
+      this.handleSubmit(ref);
+      console.log(bvModalEvent);
+    },
+    handleSubmit(ref) {
+      // Exit when the form isn't valid
+      if (!this.checkFormValidity()) {
+        return;
+      }
+      // Push the new data row
+      if (ref === "modal1") {
+        const data = {
+          todo: this.todoValue,
+          status2: this.selected,
+          description: this.descriptionValue,
+          _showDetails: false,
+        };
+        this.$store.commit("ADD_TASK", data);
+        this.toast("b-toaster-top-center", "success");
+      } else {
+        console.log(this);
+        this.$store.commit({
+          type: "EDIT_TASK",
+          id: this.curIndex,
+          task: this.todoValue,
+          desc: this.descriptionValue,
+          status: this.selected,
+        });
+
+        this.$toast.success("Edit successfully!");
+      }
+      // Hide the modal manually
+      this.$nextTick(() => {
+        this.$bvModal.hide("modal-1");
+      });
+    },
+    nameKeydown(e) {
+      if (this.todoValue.length === 0) this.isValidTodo = null;
+    },
+    descKeyDown(e) {
+      if (this.descriptionValue.length === 0) this.isValidDes = null;
+    },
+    checkShowDetails(index, showDetailState) {
+      this.$store.commit({
+        type: "CHECK_SHOW_ROW_DETAIL",
+        idRowCurrent: index,
+        statusShowDetail: showDetailState,
+      });
+    },
+    checkDuplicateData() {
+      this.checkDuplicate = false;
+      this.items.forEach((item) => {
+        if (
+          item.todo == this.todoValue &&
+          item.status2 == this.selected &&
+          item.description == this.descriptionValue
+        ) {
+          this.checkDuplicate = true;
+        }
+      });
+    },
+    changeInvalidFeedback(id) {
+      if (this.checkDuplicate) return "Duplicate data, please check again!";
+      else {
+        if (id == "input-todo")
+          return "Your task shouldn't have special key like @,/..., require content length about 3 to 20 letters";
+        else if (id == "input-default")
+          return "Description should not over 100 letter and contain special key (@, /, ....)";
+        else return "Choose one status, please!";
+      }
+    },
+    onClickOutside() {
+      this.sortState = null;
+    },
   },
 };
 </script>
@@ -537,14 +602,17 @@ export default {
     }
   }
 }
-
-.delBtn:hover {
+.iconBtn:hover {
   cursor: pointer;
+}
+#editBtn {
+  &:focus {
+    outline: none;
+  }
 }
 
 .thead-primary {
   background-color: rgba(39, 37, 37, 0.705);
   color: #ffffff;
 }
-
 </style>

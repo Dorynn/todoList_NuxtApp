@@ -1,7 +1,7 @@
 <template>
   <div class="main">
-    <header-default/>
-    <nuxt-child/>
+    <header-default />
+    <nuxt-child />
   </div>
 </template>
 
@@ -9,22 +9,21 @@
 // import headerDefault from '~/components/headerDefault.vue'
 export default {
   // components: { headerDefault },
-  head(){
-    return{
-      titleTemplate:'Todo List - %s'
-    }
-  }
-
-}
+  head() {
+    return {
+      titleTemplate: "Todo List - %s",
+    };
+  },
+};
 </script>
 
-<style >
-  .main{
-    box-sizing: border-box;
-    position: absolute;
-    overflow-x: hidden;
-    width: 100%;
-    height: 100%;
-    background-color: #ddd;
-    }
+<style>
+.main {
+  box-sizing: border-box;
+  position: absolute;
+  overflow-x: hidden;
+  width: 100%;
+  height: 100%;
+  background-color: #ddd;
+}
 </style>

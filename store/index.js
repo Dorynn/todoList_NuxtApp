@@ -1,25 +1,22 @@
-export const state = () =>({
-    images:[],
-    // descUser:[]
-})
+import Vue from 'vue';
+import Vuex from 'vuex';
+import images from './modules/images'
+import todos from './modules/todos'
+import users from './modules/users'
+Vue.use(Vuex);
 
-export  const getters={
-    images:state => state.images,
-    // descUser:state=>state.descUser
-}
-
-export const mutations={
-    setImage(state, images){
-        state.images = images
+export default() => new Vuex.Store( {
+    modules:{
+        images:images,
+        todos: todos,
+        users: users
     },
-    // setDescUser(state, descUser){
-    //     state.descUser = descUser
+    // actions:{
+    //     async fetchData({dispatch}){
+    //         await Promise.all([
+    //             dispatch('images/fetchData'),
+    //             dispatch('users/fetchData')
+    //         ])
+    //     }
     // }
-}
-
-// export const actions={
-//     async loadDescUser({commit}){
-//         let desc = await this.$axios.get('https://jsonplaceholder.typicode.com/posts')
-//         commit ('setDescUser', desc)
-//     }
-// }
+})
