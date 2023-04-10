@@ -27,8 +27,7 @@ export default {
     {src:'~/plugins/toast_notif.js', mode:'client'},
     {src:'~/plugins/v-tooltip.js', mode:'client'},
     {src:'~/plugins/click_outside.js', mode:'client'},
-
-
+    {src:'~/plugins/vuelidate.js', mode:'client'},
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -55,23 +54,31 @@ export default {
     '@nuxtjs/pwa',
     // https://go.nuxtjs.dev/content
     '@nuxt/content',
-    '@nuxtjs/i18n'
+    '@nuxtjs/i18n',
   ],
-  // i18n:{
-  //   locales: ['en', 'vi'],
-  //   defaultLocale: 'en',
-  //   vueI18n:{
-  //     fallbackLocale:'en',
-  //     messages:{
-  //       en:{
-  //         welcome:'Welcome'
-  //       },
-  //       vi:{
-  //         welcome:'xin chào'
-  //       }
-  //     }
-  //   }
-  // },
+  i18n:{
+    strategy:'no_prefix',
+    langDir:'locales'
+    ,
+    locales:[
+      {
+        code: 'en',
+        iso: 'en',
+        name: 'English',
+        file: 'en.json'
+      },
+      {
+        code: 'vi',
+        iso: 'vi',
+        name: 'Tiếng Việt',
+        file: 'vi.json'
+      }
+    ],
+    defaultLocale: 'en',
+    vueI18n:{
+      fallbackLocale:'en',
+    },
+  },
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
     // Workaround to avoid enforcing hard-coded localhost:3000: https://github.com/nuxt-community/axios-module/issues/308

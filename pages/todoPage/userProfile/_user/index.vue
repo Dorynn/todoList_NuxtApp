@@ -1,5 +1,6 @@
 <template>
   <div class="wrapper">
+    <p>{{ $t('welcome') }}</p>
       <h2>Your page {{ $route.params.user }} is active</h2>
       <b-row align-h="between" class="container">
         <b-col class="professionalDetail" cols="4">

@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-navbar toggleable="lg" type="dark" variant="dark">
-      <nuxt-link to="/">
+      <nuxt-link :to="localePath('/')">
         <b-navbar-brand href="">
           <font-awesome-icon :icon="['fas', 'house']" />
         </b-navbar-brand>
@@ -9,11 +9,16 @@
       <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
       <b-collapse id="nav-collapse" is-nav>
         <b-navbar-nav>
-          <nuxt-link to="/todoPage/taskList">
+          <nuxt-link :to="localePath('/todoPage/taskList')">
             <font-awesome-icon
               :icon="['fas', 'book']"
               style="color: white; font-size: 20px; margin-top: 6px"
             />
+          </nuxt-link>
+        </b-navbar-nav>
+        <b-navbar-nav>
+          <nuxt-link :to="localePath('/test')">
+            TEST
           </nuxt-link>
         </b-navbar-nav>
 
@@ -30,17 +35,11 @@
             >
           </b-nav-form>
           <!-- <nuxt-link to="/todoPage/userProfile"> Sign out </nuxt-link> -->
-
+          <switch-language/>
           <b-nav-item-dropdown right>
             <template #button-content> User </template>
-
-            <!-- <b-dropdown-item href="#">
-              <nuxt-link to="/todoPage/userProfile/user1">
-                <font-awesome-icon :icon="['fas', 'user']" />
-              </nuxt-link>
-            </b-dropdown-item> -->
             <b-dropdown-item href="">
-              <nuxt-link to="/todoPage/userProfile/user0"> Profile </nuxt-link>
+              <nuxt-link :to="localePath('/todoPage/userProfile/user0')"> Profile </nuxt-link>
             </b-dropdown-item>
             <b-dropdown-item href="">
               Sign out
@@ -53,7 +52,9 @@
 </template>
 
 <script>
+import switchLanguage from './switchLanguage.vue';
 export default {
+  components: { switchLanguage },
   name: "header-default",
 };
 </script>
