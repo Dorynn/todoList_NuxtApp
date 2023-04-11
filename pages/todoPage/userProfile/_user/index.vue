@@ -90,9 +90,6 @@ import { mapGetters } from 'vuex';
           default:0,
         }
     },
-  //   async fetch ({store}){
-  //   await store.dispatch('users/fetchData');
-  // },
     computed: {
       ...mapGetters(['images'])
 

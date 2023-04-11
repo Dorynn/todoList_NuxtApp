@@ -1,3 +1,59 @@
 {
-    "welcome": "Welcome"
+    "welcome": "Welcome",
+    "title":{
+        "task-list": "Todo List",
+        "feature":{
+            "theme": "Theme"
+        }
+    },
+    "field-tasklist":{
+        "todo":{
+            "label": "Task",
+            "sort-placeholder": "Type to Search"
+        },
+        "status":{
+            "label":"Status",
+            "value":{
+                "new": "New",
+                "inprogress": "Inprogress",
+                "done": "Done"
+            },
+            "sort-placeholder": "Type to Search"
+        },
+        "description":{
+            "label":"Description"
+        },
+        "delete":{
+            "label":"Delete"
+        },
+        "edit":{
+            "label":"Edit"
+        }
+    },
+    "action":{
+        "add-btn": {
+            "label":"Add task",
+            "tool-tip": "Click to add new task!"
+        },
+        "hide-detail": {
+            "label":"Hide detail",
+            "tool-tip": "Click to hide detail"
+        },
+        "hover":{
+            "see-detail":"Click to see details content!",
+            "delete-btn": "Click to delete this task!",
+            "edit-btn": "Click to edit this task!"
+        }
+    },
+    "messages":{
+        "error":{
+            "required":"Field is required!",
+            "minLength":"At least 3 letter!",
+            "maxLength": "Maximum is 25 letters!",
+            "special-characters": "Shouldn't include special characters like @,#$%&^*.  -?..! and over 1 whitespaces",
+            "duplicated": "Data is duplicated!"
+
+        }
+    }
+
 }

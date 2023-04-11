@@ -1,3 +1,46 @@
 {
-    "welcome":"Chào mừng"
-}
+    "welcome": "Chào mừng",
+    "title":{
+    "task-list": "Danh sách việc cần làm",
+    "feature":{
+    "theme": "Giao diện"
+    }
+    },
+    "field-tasklist":{
+    "todo":{
+    "label": "Việc cần làm",
+    "sort-placeholder": "Nhập để tìm kiếm"
+    },
+    "status":{
+    "label":"Trạng thái",
+    "value":{
+    "new": "Mới",
+    "inprogress": "Đang thực hiện",
+    "done": "Hoàn thành"
+    },
+    "sort-placeholder": "Nhập để tìm kiếm"
+    },
+    "description":{
+    "label":"Mô tả"
+    },
+    "delete":{
+    "label":"Xóa"
+    },
+    "edit":{
+    "label":"Sửa"
+    }
+    },
+    "action":{
+    "add-btn": "Thêm việc cần làm",
+    "hide-detail": "Ẩn chi tiết"
+    },
+    "messages":{
+    "error":{
+    "required":"Trường bắt buộc!",
+    "minLength":"Tối thiểu 3 ký tự!",
+    "maxLength": "Tối đa 25 ký tự!",
+    "special-characters": "Không được chứa ký tự đặc biệt như @,#$%&^*. -?..! và hơn 1 khoảng trắng",
+    "duplicated": "Dữ liệu bị trùng lặp!"
+    }
+    }
+    }

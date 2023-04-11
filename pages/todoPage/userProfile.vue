@@ -48,10 +48,6 @@ export default {
     await store.dispatch('getImages');
     // await store.dispatch('getUsersInfo');
   },
-  // created(){
-  //   this.$store.dispatch('images/fetchData')
-  //   this.$store.dispatch('users/fetchData')
-  // },
   methods: {
     showProfile() {
       console.log('image...',this.images)

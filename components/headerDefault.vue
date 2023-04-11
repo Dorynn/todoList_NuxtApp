@@ -9,7 +9,9 @@
       <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
       <b-collapse id="nav-collapse" is-nav>
         <b-navbar-nav>
-          <nuxt-link :to="localePath('/todoPage/taskList')">
+          <nuxt-link :to="
+            
+            localePath('/todoPage/taskList')">
             <font-awesome-icon
               :icon="['fas', 'book']"
               style="color: white; font-size: 20px; margin-top: 6px"
@@ -17,9 +19,7 @@
           </nuxt-link>
         </b-navbar-nav>
         <b-navbar-nav>
-          <nuxt-link :to="localePath('/test')">
-            TEST
-          </nuxt-link>
+          <nuxt-link :to="localePath('/test')"> TEST </nuxt-link>
         </b-navbar-nav>
 
         <!-- Right aligned nav items -->
@@ -35,15 +35,15 @@
             >
           </b-nav-form>
           <!-- <nuxt-link to="/todoPage/userProfile"> Sign out </nuxt-link> -->
-          <switch-language/>
+          <switch-language />
           <b-nav-item-dropdown right>
             <template #button-content> User </template>
             <b-dropdown-item href="">
-              <nuxt-link :to="localePath('/todoPage/userProfile/user0')"> Profile </nuxt-link>
+              <nuxt-link :to="localePath('/todoPage/userProfile/user0')">
+                Profile
+              </nuxt-link>
             </b-dropdown-item>
-            <b-dropdown-item href="">
-              Sign out
-            </b-dropdown-item>
+            <b-dropdown-item href=""> Sign out </b-dropdown-item>
           </b-nav-item-dropdown>
         </b-navbar-nav>
       </b-collapse>
@@ -52,7 +52,7 @@
 </template>
 
 <script>
-import switchLanguage from './switchLanguage.vue';
+import switchLanguage from "./switchLanguage.vue";
 export default {
   components: { switchLanguage },
   name: "header-default",
