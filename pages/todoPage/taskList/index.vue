@@ -15,11 +15,13 @@
         id="modal-1"
         :ref="changeModal"
         :title="title"
-        @ok="$v.touch()"
+        @ok="$v.$touch()"
         @hidden="resetInfoModal"
+        :ok-disabled="true"
       >
       
-      <form ref="form" @submit.stop.prevent="$v.$touch()">
+      <form ref="form" @submit.prevent="handleSubmit">
+        <pre>{{ $v.todoValue }}</pre>
         <div
           class="form-group"
           :class="{ 'form-group--error': $v.todoValue.$error }"
@@ -39,10 +41,11 @@
         <small
           class="error"
           v-if="
-            $v.todoValue.format && !$v.todoValue.$error && $v.todoValue.required
+            !$v.todoValue.format 
           "
           >Shouldn't include special letter: @,#\$%&^*...!</small
         >
+        <pre>{{ $v.descriptionValue }}</pre>
   
         <div
           class="form-group"
@@ -51,7 +54,7 @@
           <label class="form__label">Descripton</label>
           <textarea
             class="form__input"
-            v-model.trim.lazy="$v.descriptionValue.$model"
+            v-model="$v.descriptionValue.$model"
           ></textarea>
         </div>
   
@@ -69,6 +72,7 @@
           v-if="$v.descriptionValue.format && $v.descriptionValue.required"
           >Shouldn't include special letter: @,#\$%&^*...!</small
         >
+        <pre>{{ $v.todoValue }}</pre>
   
         <div
           class="form-group"
@@ -250,7 +254,7 @@ import {
 } from "vuelidate/lib/validators";
 const format = helpers.regex(
   "format",
-  /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/
+  /^(?=.{0,}$)[A-Za-z0-9]+(?:\s[A-Za-z0-9]+)*$/
 );
 export default {
   name: "IndexPage",
@@ -265,8 +269,6 @@ export default {
       indexRowDetail: 0,
       isStatusState: false,
       title: "",
-      name: "",
-      nameState: null,
       isSorted: false,
       checked: false,
       todoValue: "",
@@ -277,28 +279,25 @@ export default {
       isValidDes: null,
       todoSearch: null,
       status2SearchInput: null,
-      filterCol: ["todo"],
+      // filterCol: ["todo"],
       isColFilter: false,
       curIndex: 0,
       selected: "New",
-      transProps: {
-        // Transition name
-        name: "flip-list",
-      },
-      options: [
-        {
-          value: "New",
-          text: "New",
-        },
-        {
-          value: "Inprogress",
-          text: "Inprogress",
-        },
-        {
-          value: "Done",
-          text: "Done",
-        },
-      ],
+
+      // options: [
+      //   {
+      //     value: "New",
+      //     text: "New",
+      //   },
+      //   {
+      //     value: "Inprogress",
+      //     text: "Inprogress",
+      //   },
+      //   {
+      //     value: "Done",
+      //     text: "Done",
+      //   },
+      // ],
       fields: [
         {
           key: "todo",
@@ -323,6 +322,18 @@ export default {
       ],
     };
   },
+  beforeCreate(){
+    this.todoValue=""
+    this.descriptionValue=""
+    this.selected = "New"
+    console.log('before create', this.$v)
+  },
+  created(){
+    console.log('created: ', this.$v)
+  },
+  beforeMount(){
+    console.log('beforemount', this.$v)
+  },
   directives: {
     clickOutside: vClickOutside.directive,
   },
@@ -343,11 +354,9 @@ export default {
       maxLength: maxLength(25),
       format,
     },
-    name: {
-      required,
-      minLength: minLength(4),
-    },
+
   },
+
   computed: {
     ...mapGetters(["items"]),
     changeSearchField() {
@@ -528,8 +537,6 @@ export default {
       return valid && this.isValidDes && this.isValidTodo;
     },
     handleOk(bvModalEvent, ref) {
-      let editButton = document.getElementById("editBtn");
-      editButton.focus({ focusVisible: false });
       // Prevent modal from closing
       bvModalEvent.preventDefault();
       // Trigger submit handler
@@ -669,3 +676,5 @@ export default {
   flex-direction: column;
 }
 </style>
+
+

@@ -1,8 +1,9 @@
 <template>
 <div>
+  <pre>{{ $v.name }}</pre>
   <div class="form-group" :class="{ 'form-group--error': $v.name.$error }">
     <label class="form__label">Name</label>
-    <input class="form__input" v-model.trim.lazy="$v.name.$model"/>
+    <input class="form__input" v-model.trim="$v.name.$model"/>
   </div>
   <div class="error" v-if="!$v.name.required">Field is required</div>
   <div class="error" v-if="!$v.name.minLength">legn</div>
@@ -22,7 +23,7 @@ import { required, minLength, between } from 'vuelidate/lib/validators'
 export default {
   data() {
     return {
-      name: '',
+      name: 'ty',
       age: 0
     }
   },
