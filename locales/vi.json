@@ -1,46 +1,97 @@
 {
     "welcome": "Chào mừng",
-    "title":{
-    "task-list": "Danh sách việc cần làm",
-    "feature":{
-    "theme": "Giao diện"
+    "title": {
+        "task-list": "Danh sách việc cần làm",
+        "feature": {
+            "theme": "Giao diện"
+        },
+        "modal": {
+            "edit": "Chỉnh sửa nhiệm vụ",
+            "add": "Thêm nhiệm vụ"
+        },
+        "homePage": {
+            "header": "ỨNG DỤNG DANH SÁCH VIỆC CẦN LÀM",
+            "lead": "Chào mừng mọi người đến với ứng dụng của chúng tôi",
+            "navigation": "Để biết thêm thông tin, hãy truy cập trang web",
+            "button": "Nhấn vào đây"
+        },
+        "headerDefault": {
+            "user": {
+                "label": "Người dùng",
+                "profile": "Hồ sơ",
+                "sign-out": "Đăng xuất"
+            }
+        },
+        "personal-page": {
+            "professional-detail": "Chi tiết chuyên nghiệp",
+            "about": {
+                "label": "Thông tin cá nhân",
+                "username": "Tên người dùng",
+                "name": "Tên",
+                "website": "Trang web",
+                "phone": "Điện thoại",
+                "email": "E-mail",
+                "city": "Thành phố",
+                "street": "Đường",
+                "suite": "Suite",
+                "company": "Tên công ty",
+                "catch": "Slogan"
+            },
+            "other user": "Người dùng khác"
+        }
+    },
+    "field-tasklist": {
+        "todo": {
+            "label": "Nhiệm vụ",
+            "sort-placeholder": "Nhập từ khóa để tìm kiếm"
+        },
+        "status": {
+            "label": "Trạng thái",
+            "value": {
+                "new": "Mới",
+                "inprogress": "Đang tiến hành",
+                "done": "Đã hoàn thành"
+            },
+            "sort-placeholder": "Nhập từ khóa để tìm kiếm"
+        },
+        "description": {
+            "label": "Mô tả"
+        },
+        "delete": {
+            "label": "Xóa"
+        },
+        "edit": {
+            "label": "Chỉnh sửa"
+        }
+    },
+    "action": {
+        "add-btn": {
+            "label": "Thêm nhiệm vụ",
+            "tool-tip": "Nhấn vào đây để thêm nhiệm vụ mới!"
+        },
+        "hide-detail": {
+            "label": "Ẩn chi tiết",
+            "tool-tip": "Nhấn vào đây để ẩn chi tiết"
+        },
+        "hover": {
+            "see-detail": "Nhấn vào đây để xem chi tiết!",
+            "delete-btn": "Nhấn vào đây để xóa nhiệm vụ này!",
+            "edit-btn": "Nhấn vào đây để chỉnh sửa nhiệm vụ này!"
+        },
+        "cancel-btn": {
+            "label": "Hủy"
+        },
+        "ok-btn": {
+            "label": "Đồng ý"
+        }
+    },
+    "messages": {
+        "error": {
+            "required": "Trường này là bắt buộc!",
+            "minLength": "Ít nhất 3 ký tự!",
+            "maxLength": "Tối đa 25 ký tự!",
+            "special-characters": "Không nên chứa ký tự đặc biệt như @,#$%&^*. -?..! và hơn 1 khoảng trắng",
+            "duplicated": "Dữ liệu bị trùng!"
+        }
     }
-    },
-    "field-tasklist":{
-    "todo":{
-    "label": "Việc cần làm",
-    "sort-placeholder": "Nhập để tìm kiếm"
-    },
-    "status":{
-    "label":"Trạng thái",
-    "value":{
-    "new": "Mới",
-    "inprogress": "Đang thực hiện",
-    "done": "Hoàn thành"
-    },
-    "sort-placeholder": "Nhập để tìm kiếm"
-    },
-    "description":{
-    "label":"Mô tả"
-    },
-    "delete":{
-    "label":"Xóa"
-    },
-    "edit":{
-    "label":"Sửa"
-    }
-    },
-    "action":{
-    "add-btn": "Thêm việc cần làm",
-    "hide-detail": "Ẩn chi tiết"
-    },
-    "messages":{
-    "error":{
-    "required":"Trường bắt buộc!",
-    "minLength":"Tối thiểu 3 ký tự!",
-    "maxLength": "Tối đa 25 ký tự!",
-    "special-characters": "Không được chứa ký tự đặc biệt như @,#$%&^*. -?..! và hơn 1 khoảng trắng",
-    "duplicated": "Dữ liệu bị trùng lặp!"
-    }
-    }
-    }
+}

@@ -1,11 +1,9 @@
 <template>
   <div class="wrapper">
-    <p>{{ $t('welcome') }}</p>
-      <h2>Your page {{ $route.params.user }} is active</h2>
+      <!-- <h2>Your page {{ $route.params.user }} is active</h2> -->
       <b-row align-h="between" class="container">
         <b-col class="professionalDetail" cols="4">
-          <h4 class="info">Professional Detail</h4>
-          <!-- :src="SET_IMAGES[userID].url" -->
+          <h4 class="info">{{ $t('title.personal-page.professional-detail') }}</h4>
           <img
             :src="images[userID].url"
             alt="avatar"
@@ -13,11 +11,11 @@
           />
           <b-row align-h="between">
             <b-col cols="4">
-              <p class="info">Username</p>
-              <p class="info">Name</p>
-              <p class="info">Email</p>
-              <p class="info">Location</p>
-              <p class="info">Company</p>
+              <p class="info">{{ $t('title.personal-page.about.username') }}</p>
+              <p class="info">{{ $t('title.personal-page.about.name') }}</p>
+              <p class="info">{{ $t('title.personal-page.about.email') }}</p>
+              <p class="info">{{ $t('title.personal-page.about.street') }}</p>
+              <p class="info">{{ $t('title.personal-page.about.company') }}</p>
             </b-col>
             <b-col cols="8">
               <p class="infContent">{{ users[userID].username }}</p>
@@ -29,15 +27,17 @@
           </b-row>
         </b-col>
         <b-col class="aboutMe" cols="7">
-          <h4 class="info">About me</h4>
+          <h4 class="info">{{ $t('title.personal-page.about.label') }}</h4>
           <hr />
           <b-row align-h="between">
             <b-col cols="2">
-              <p class="info">Username</p>
-              <p class="info">Name</p>
-              <p class="info">Website</p>
-              <p class="info">Phone</p>
-              <p class="info">E-mail</p>
+              <p class="info">{{ $t('title.personal-page.about.username') }}</p>
+              <p class="info">{{ $t('title.personal-page.about.name') }}</p>
+
+              <p class="info">{{ $t('title.personal-page.about.website') }}</p>
+              <p class="info">{{ $t('title.personal-page.about.phone') }}</p>
+              <p class="info">{{ $t('title.personal-page.about.email') }}</p>
+
               <a href="">{{users[userID].email}}</a>
               
             </b-col>
@@ -50,11 +50,11 @@
               <p class="infContent">{{ users[userID].phone }}</p>
             </b-col>
             <b-col cols="3">
-              <p class="info">City</p>
-              <p class="info">Street</p>
-              <p class="info">suite</p>
-              <p class="info">Company Name</p>
-              <p class="info">Catch Phrase</p>
+              <p class="info">{{ $t('title.personal-page.about.city') }}</p>
+              <p class="info">{{ $t('title.personal-page.about.street') }}</p>
+              <p class="info">{{ $t('title.personal-page.about.suite') }}</p>
+              <p class="info">{{ $t('title.personal-page.about.company') }}</p>
+              <p class="info">{{ $t('title.personal-page.about.catch') }}</p>
   
             </b-col>
             <b-col cols="3">
@@ -67,9 +67,7 @@
           </b-row>
           <h4 class="info">I'm web developer</h4>
           <hr>
-          <!-- <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Recusandae soluta consectetur ipsam, quidem dolores neque eveniet veniam quae officiis aliquid sapiente omnis earum qui quasi, placeat, voluptate error! Non quo facere dolore tenetur quis adipisci?</p> -->
-          <!-- <p>{{ descUser[userID] }}</p> -->
-          <!-- <p>{{ SET_IMAGES[userID].title }}</p> -->
+          <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Recusandae soluta consectetur ipsam, quidem dolores neque eveniet veniam quae officiis aliquid sapiente omnis earum qui quasi, placeat, voluptate error! Non quo facere dolore tenetur quis adipisci?</p>
     <p>{{ $t('welcome') }}</p>
 
         </b-col>

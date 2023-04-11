@@ -1,6 +1,5 @@
 <template>
   <div id="homePage">
-    <p>{{ $t("welcome") }}</p>
     <h1 class="title">{{ $t('title.task-list') }}</h1>
     <div class="control">
       <b-button
@@ -17,7 +16,8 @@
         :title="title"
         @ok="handleOk($event, changeModal)"
         @hidden="resetInfoModal"
-        :ok-disabled="true"
+        :cancel-title="$t('action.cancel-btn.label')"
+        :ok-title="$t('action.ok-btn.label')"
       >
         <form ref="form" @submit.stop.prevent="handleSubmit">
           <!-- <pre>{{ $v?.todoValue }}</pre> -->
@@ -44,7 +44,7 @@
             >{{ $t('messages.error.maxLength') }}</small
           >
           <small class="error" v-if="!$v.todoValue.format"
-            >{{ $t('message.error.special-characters') }}</small
+            >{{ $t('messages.error.special-characters') }}</small
           >
           <!-- <pre>{{ $v.descriptionValue }}</pre> -->
 
@@ -62,17 +62,17 @@
 
           <small
             class="error"
-            v-if="!$v.todoValue.required && $v.todoValue.$error"
+            v-if="!$v.descriptionValue.required && $v.descriptionValue.$error"
             >{{ $t('messages.error.required') }}</small
           >
-          <small class="error" v-if="!$v.todoValue.minLength"
+          <small class="error" v-if="!$v.descriptionValue.minLength"
             >{{ $t('messages.error.minLength') }}</small
           >
-          <small class="error" v-if="!$v.todoValue.maxLength"
+          <small class="error" v-if="!$v.descriptionValue.maxLength"
             >{{ $t('messages.error.maxLength') }}</small
           >
-          <small class="error" v-if="!$v.todoValue.format"
-            >{{ $t('message.error.special-characters') }}</small
+          <small class="error" v-if="!$v.descriptionValue.format"
+            >{{ $t('messages.error.special-characters') }}</small
           >
           <!-- <pre>{{ $v.selected }}</pre> -->
 
@@ -313,12 +313,12 @@ export default {
       ],
     };
   },
-  beforeCreate(){
-    this.todoValue=""
-    this.descriptionValue=""
-    this.selected = "New"
-    console.log('before create', this.$v)
-  },
+  // beforeCreate(){
+  //   this.todoValue=""
+  //   this.descriptionValue=""
+  //   this.selected = "New"
+  //   console.log('before create', this.$v)
+  // },
   created(){
     console.log('created: ', this.$v)
   },
@@ -368,6 +368,17 @@ export default {
       return this.isModal ? "modal1" : "modal2";
     },
   },
+  watch:{
+    todoValue(){
+      console.log("change: ", this.$v.todoValue.$error);
+    },
+    items(){
+      if(this.items.length < 1)
+        console.log("loading....")
+        console.log("change item: ", this.items)
+    }
+  },
+
   mounted() {
     setTimeout(() => {
       this.items;
@@ -400,7 +411,7 @@ export default {
       this.descriptionValue = item.description;
       this.selected = item.status2;
       this.isModal = false;
-      this.title = "Edit todo";
+      this.title = this.$t('title.modal.edit');
       console.log("when click edit icon: ", item);
     },
     changeBackground() {
@@ -421,79 +432,10 @@ export default {
         autoHideDelay: 1000,
       });
     },
-    // inputTodoState() {
-    //   let format = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
-    //   if (this.todoValue.length === 0) this.isValidTodo = null;
-    //   else if (
-    //     this.todoValue.length < 3 ||
-    //     this.todoValue.length > 20 ||
-    //     format.test(this.todoValue)
-    //   )
-    //     this.isValidTodo = false;
-    //   else this.isValidTodo = true;
-    // },
-    // inputTodoBlur() {
-    //   this.inputTodoState();
-    //   this.inputStatusState();
-    //   this.inputDescState();
-    //   if (this.isValidTodo) {
-    //     this.checkDuplicateData();
-    //     if (this.checkDuplicate) {
-    //       this.isValidTodo = false;
-    //       this.isValidDes = false;
-    //       this.isStatusState = true;
-    //     }
-    //   }
-    // },
-    // inputStatusState() {
-    //   if (this.selected == null) {
-    //     this.isStatusState = true;
-    //   } else {
-    //     this.isStatusState = false;
-    //   }
-    // },
-    // inputStatusBlur() {
-    //   this.inputTodoState();
-    //   this.inputStatusState();
-    //   this.inputDescState();
 
-    //   if (!this.isStatusState || this.selected == null) {
-    //     this.checkDuplicateData();
-    //     if (this.checkDuplicate) {
-    //       this.isStatusState = true;
-    //       this.isValidDes = false;
-    //       this.isValidTodo = false;
-    //     }
-    //   }
-    // },
-    // inputDescState() {
-    //   let format = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
-    //   if (this.descriptionValue.length === 0) this.isValidDes = null;
-    //   else if (
-    //     this.descriptionValue.length < 3 ||
-    //     this.descriptionValue.length > 100 ||
-    //     format.test(this.descriptionValue)
-    //   )
-    //     this.isValidDes = false;
-    //   else this.isValidDes = true;
-    // },
-    // inputDescBlur() {
-    //   this.inputTodoState();
-    //   this.inputStatusState();
-    //   this.inputDescState();
-    //   if (this.isValidDes) {
-    //     this.checkDuplicateData();
-    //     if (this.checkDuplicate) {
-    //       this.isValidDes = false;
-    //       this.isValidTodo = false;
-    //       this.isStatusState = true;
-    //     }
-    //   }
-    // },
     changeIsModalAdd() {
       this.isModal = true;
-      this.title = "Add todo";
-      // console.log("when click add button", this.isModal);
+      this.title =this.$t('title.modal.add');
     },
     setIsStatus2Filter() {
 
@@ -502,14 +444,6 @@ export default {
     },
     setIsTodoFilter() {
       this.isColFilter = true;
-  
-      // this.changeSearchField();
-      // this.changeSearchParams();
-      // if(inputID === 'filter-input'){
-      //   this.isColFilter=true;
-      // }else if(inputID ==='filter-status2'){
-      //   this.isColFilter=false;
-      // }
     },
     changeStatusState(val) {
       if (val === "Done") {
@@ -592,16 +526,6 @@ export default {
         }
       });
     },
-    // changeInvalidFeedback(id) {
-    //   if (this.checkDuplicate) return "Duplicate data, please check again!";
-    //   else {
-    //     if (id == "input-todo")
-    //       return "Your task shouldn't have special key like @,/..., require content length about 3 to 20 letters";
-    //     else if (id == "input-default")
-    //       return "Description should not over 100 letter and contain special key (@, /, ....)";
-    //     else return "Choose one status, please!";
-    //   }
-    // },
     onClickOutside() {
       this.sortState = null;
     },

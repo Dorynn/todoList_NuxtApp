@@ -4,6 +4,40 @@
         "task-list": "Todo List",
         "feature":{
             "theme": "Theme"
+        },
+        "modal":{
+            "edit": "Edit task",
+            "add": "Add task"
+        },
+        "homePage":{
+            "header":"TODO LIST APP",
+            "lead":"Welcome everyone come here to using our app",
+            "navigation": "For more information visit website",
+            "button": "Click here"
+        },
+        "headerDefault":{
+            "user":{
+                "label":"User",
+                "profile":"Profile",
+                "sign-out":"Sign out"
+            }
+        },
+        "personal-page":{
+            "professional-detail":"Professional Detail",
+            "about": {
+                "label": "About",
+                "username": "Username",
+                "name": "Name",
+                "website": "Website",
+                "phone": "Phone",
+                "email": "E-mail",
+                "city": "City",
+                "street": "Street",
+                "suite": "Suite",
+                "company": "Company name",
+                "catch": "Catch Phrase"
+            },
+            "other user": "Other user"
         }
     },
     "field-tasklist":{
@@ -43,6 +77,12 @@
             "see-detail":"Click to see details content!",
             "delete-btn": "Click to delete this task!",
             "edit-btn": "Click to edit this task!"
+        },
+        "cancel-btn":{
+            "label": "Cancel"
+        },
+        "ok-btn":{
+            "label":"Ok"
         }
     },
     "messages":{
