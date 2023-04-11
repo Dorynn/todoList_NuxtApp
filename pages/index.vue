@@ -8,21 +8,25 @@
     <p>For more information visit website</p>
     <!-- <p>{{ $store.state.name }}</p> -->
     <p>{{ $t('welcome') }}</p>
-      <nuxt-link to="/todoPage/taskList">
-        <b-button variant="primary">Click here</b-button>
-      </nuxt-link>
+    <nuxt-link :to="localePath('/todoPage/taskList')">
+      <b-button variant="primary">Click here</b-button>
+    </nuxt-link>
+    <switch-language/>
     </b-jumbotron>
   </div>
 </template>
 
 <script>
+import switchLanguage from '~/components/switchLanguage.vue';
 export default {
+  components: { switchLanguage },
   name: "IndexPage",
 };
 </script>
 
 <style lang="scss" scroped>
 #root {
+  list-style-type: none;
   height: 100vh;
   width: 100vw;
   position: relative;

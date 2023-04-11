@@ -1,7 +1,6 @@
 <template>
   <div id="homePage">
-    <p>{{ $t('welcome') }}</p>
-
+    <p>{{ $t("welcome") }}</p>
     <h1 class="title">Todo List</h1>
     <div class="control">
       <b-button
@@ -11,60 +10,78 @@
         class="padding-btn"
         >Add</b-button
       >
+
       <b-modal
         id="modal-1"
         :ref="changeModal"
         :title="title"
-        @ok="handleOk($event, changeModal)"
+        @ok="$v.touch()"
         @hidden="resetInfoModal"
       >
-        <form ref="form" @submit.stop.prevent="handleSubmit">
-          <b-form-group
-            id="input-todo"
-            label="Task"
-            label-for="input-todo-content"
-            :invalid-feedback="changeInvalidFeedback()"
-            :state="isValidTodo"
-          >
-            <b-form-input
-              id="input-todo-content"
-              v-model.trim="todoValue"
-              placeholder="Enter your task"
-              :state="isValidTodo"
-              @keydown="nameKeydown($event)"
-              required
-              @blur="inputTodoBlur()"
-            ></b-form-input>
-          </b-form-group>
-          <b-form-group label="Status">
-            <b-form-select
-              v-model="selected"
-              :options="options"
-              required
-              @change="inputStatusBlur()"
-            >
-            </b-form-select>
-            <small v-show="isStatusState" style="color: red">{{
-              changeInvalidFeedback()
-            }}</small>
-          </b-form-group>
-          <b-form-group
-            id="input-description"
-            label="Description"
-            label-for="input-default"
-            :invalid-feedback="changeInvalidFeedback()"
-            :state="isValidDes"
-          >
-            <b-form-textarea
-              id="input-default"
-              placeholder="Enter task's description...."
-              v-model.trim="descriptionValue"
-              :state="isValidDes"
-              @input="descKeyDown($event)"
-              @blur="inputDescBlur()"
-              required
-            ></b-form-textarea>
-          </b-form-group>
+      
+      <form ref="form" @submit.stop.prevent="$v.$touch()">
+        <div
+          class="form-group"
+          :class="{ 'form-group--error': $v.todoValue.$error }"
+        >
+          <label class="form__label">Task</label>
+          <input class="form__input" v-model.trim.lazy="$v.todoValue.$model" />
+        </div>
+        <small class="error" v-if="!$v.todoValue.required && $v.todoValue.$error"
+          >Field is required!</small
+        >
+        <small class="error" v-if="!$v.todoValue.minLength"
+          >At least 3 letter!</small
+        >
+        <small class="error" v-if="!$v.todoValue.maxLength"
+          >Maximum is 25 letters!</small
+        >
+        <small
+          class="error"
+          v-if="
+            $v.todoValue.format && !$v.todoValue.$error && $v.todoValue.required
+          "
+          >Shouldn't include special letter: @,#\$%&^*...!</small
+        >
+  
+        <div
+          class="form-group"
+          :class="{ 'form-group--error': $v.descriptionValue.$error }"
+        >
+          <label class="form__label">Descripton</label>
+          <textarea
+            class="form__input"
+            v-model.trim.lazy="$v.descriptionValue.$model"
+          ></textarea>
+        </div>
+  
+        <small class="error" v-if="!$v.descriptionValue.required && $v.descriptionValue.$error"
+          >Field is required!</small
+        >
+        <small class="error" v-if="!$v.descriptionValue.minLength"
+          >At least 3 letter!</small
+        >
+        <small class="error" v-if="!$v.descriptionValue.maxLength"
+          >Maximum is 25 letters!</small
+        >
+        <small
+          class="error"
+          v-if="$v.descriptionValue.format && $v.descriptionValue.required"
+          >Shouldn't include special letter: @,#\$%&^*...!</small
+        >
+  
+        <div
+          class="form-group"
+          :class="{ 'form-group--error': $v.selected.$error }"
+        >
+          <label class="form__label">Status</label>
+          <select v-model.lazy="$v.selected.$model">
+            <option value="New">New</option>
+            <option value="Inprogress">Inprogress</option>
+            <option value="Done">Done</option>
+          </select>
+        </div>
+
         </form>
       </b-modal>
       <div>
@@ -225,6 +242,16 @@
 <script>
 import vClickOutside from "v-click-outside";
 import { mapGetters, mapMutations } from "vuex";
+import {
+  required,
+  minLength,
+  maxLength,
+  helpers,
+} from "vuelidate/lib/validators";
+const format = helpers.regex(
+  "format",
+  /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/
+);
 export default {
   name: "IndexPage",
   head: {
@@ -253,16 +280,12 @@ export default {
       filterCol: ["todo"],
       isColFilter: false,
       curIndex: 0,
-      selected: null,
+      selected: "New",
       transProps: {
         // Transition name
         name: "flip-list",
       },
       options: [
-        {
-          value: null,
-          text: "Choose status for your task",
-        },
         {
           value: "New",
           text: "New",
@@ -300,6 +323,31 @@ export default {
       ],
     };
   },
+  directives: {
+    clickOutside: vClickOutside.directive,
+  },
+
+  validations: {
+    descriptionValue: {
+      required,
+      minLength: minLength(3),
+      maxLength: maxLength(100),
+      format,
+    },
+    selected: {
+      required,
+    },
+    todoValue: {
+      required,
+      minLength: minLength(3),
+      maxLength: maxLength(25),
+      format,
+    },
+    name: {
+      required,
+      minLength: minLength(4),
+    },
+  },
   computed: {
     ...mapGetters(["items"]),
     changeSearchField() {
@@ -326,9 +374,6 @@ export default {
       this.items;
       this.isBusy = false;
     }, 1000);
-  },
-  directives: {
-    clickOutside: vClickOutside.directive,
   },
   methods: {
     ...mapMutations([
@@ -492,6 +537,7 @@ export default {
       console.log(bvModalEvent);
     },
     handleSubmit(ref) {
+      
       // Exit when the form isn't valid
       if (!this.checkFormValidity()) {
         return;
@@ -616,5 +662,10 @@ export default {
 .thead-primary {
   background-color: rgba(39, 37, 37, 0.705);
   color: #ffffff;
+}
+
+.form-group{
+  display: flex;
+  flex-direction: column;
 }
 </style>
