@@ -1,5 +1,8 @@
 <template>
   <div>
+    <!-- <p v-if="isloading">Loading</p> -->
+    <div>
+
     <nuxt-child :users="users" :userID="userID" />
     <div class="otherUser">
       <h4>Other user</h4>
@@ -19,11 +22,13 @@
       </div>
       <p>{{ images[userID].url }}</p>
     </div>
+          
+  </div>
   </div>
 </template>
 
 <script>
-import { mapActions, mapGetters } from "vuex";
+import { mapActions, mapGetters, mapState } from "vuex";
 
 export default {
   head() {
@@ -44,9 +49,13 @@ export default {
       userID: 0,
     };
   },
+  
   async fetch ({store}){
     await store.dispatch('getImages');
     // await store.dispatch('getUsersInfo');
+  },
+  computed:{
+    ...mapGetters(['images'])
   },
   methods: {
     showProfile() {
@@ -55,10 +64,16 @@ export default {
       this.$router.push(`/todoPage/userProfile/user${this.userID}`);
       console.log("active");
     },
-
+    // ...mapActions('users',['getUserInfo']),
+    // ...mapActions('images', ['getImages'])
   },
-  computed: {
-    ...mapGetters(['images']),
+  created(){
+    // await this.$store.dispatch('getImages')
+    // await this.$store.dispatch('getUserInfo')
+    
+    // setTimeout(() => {
+    //   this.isloading = false
+    // }, 1000);
   },
 };
 </script>

@@ -20,6 +20,10 @@
                 "label":"User",
                 "profile":"Profile",
                 "sign-out":"Sign out"
+            },
+            "search":{
+                "label":"Search",
+                "placeholder": "Type to search"
             }
         },
         "personal-page":{

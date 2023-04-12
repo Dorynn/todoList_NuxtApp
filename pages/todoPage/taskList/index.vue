@@ -1,5 +1,8 @@
 <template>
-  <div id="homePage">
+  <div>
+    <p v-if="isloading">Loading....</p>
+  
+  <div id="homePage" v-else>
     <h1 class="title">{{ $t('title.task-list') }}</h1>
     <div class="control">
       <b-button
@@ -97,7 +100,6 @@
           v-model="checked"
           name="check-button"
           switch
-          @change="changeBackground()"
           size="lg"
         >
           <p>{{$t('title.feature.theme')}}</p>
@@ -241,22 +243,23 @@
             <b-col sm="3" class="text-sm-right"><b>{{$t('field-tasklist.status.label')}}:</b></b-col>
             <b-col>{{ row.item.status2 }}</b-col>
           </b-row>
-          <b-button size="sm" @click="row.toggleDetails">{{$t('action.hide-detail')}}</b-button>
+          <b-button size="sm" @click="row.toggleDetails">{{$t('action.hide-detail.tool-tip')}}</b-button>
         </b-card>
       </template>
     </b-table>
   </div>
+      
+</div>
 </template>
 
 <script>
 import vClickOutside from "v-click-outside";
-import { mapGetters, mapMutations } from "vuex";
+import { mapGetters, mapMutations, mapState } from "vuex";
 import {
   required,
   minLength,
   maxLength,
-  helpers,
-  sameAs,
+  helpers
 } from "vuelidate/lib/validators";
 const format = helpers.regex(
   "format",
@@ -267,13 +270,14 @@ export default {
   head: {
     title: "Task List",
   },
+
   data() {
     return {
+      // isloading: true,
       sortState: null,
       ischeckDuplicate: false,
       isBusy: true,
       indexRowDetail: 0,
-      isStatusState: false,
       title: "",
       isSorted: false,
       checked: false,
@@ -281,11 +285,8 @@ export default {
       descriptionValue: "",
       isModal: false,
       background: "light",
-      isValidTodo: null,
-      isValidDes: null,
       todoSearch: null,
       status2SearchInput: null,
-      // filterCol: ["todo"],
       isColFilter: false,
       curIndex: 0,
       selected: "New",
@@ -313,18 +314,9 @@ export default {
       ],
     };
   },
-  // beforeCreate(){
-  //   this.todoValue=""
-  //   this.descriptionValue=""
-  //   this.selected = "New"
-  //   console.log('before create', this.$v)
-  // },
-  created(){
-    console.log('created: ', this.$v)
-  },
-  beforeMount(){
-    console.log('beforemount', this.$v)
-  },
+
+
+
   directives: {
     clickOutside: vClickOutside.directive,
   },
@@ -348,6 +340,7 @@ export default {
   },
 
   computed: {
+    ...mapState(['isloading']),
     ...mapGetters(["items"]),
     changeSearchField() {
       if (this.isColFilter) {
@@ -367,24 +360,20 @@ export default {
     changeModal() {
       return this.isModal ? "modal1" : "modal2";
     },
+    
   },
   watch:{
     todoValue(){
       console.log("change: ", this.$v.todoValue.$error);
+      console.log("change: ", this.$v.descriptionValue.$error);
+      console.log("change: ", this.$v.selected.$error);
     },
-    items(){
-      if(this.items.length < 1)
-        console.log("loading....")
-        console.log("change item: ", this.items)
+    checked(){
+      this.checked ? (this.background = "dark") : (this.background = "light");
     }
   },
 
-  mounted() {
-    setTimeout(() => {
-      this.items;
-      this.isBusy = false;
-    }, 1000);
-  },
+
   methods: {
     ...mapMutations([
       "DELETE_TASK",
@@ -400,9 +389,6 @@ export default {
       this.todoValue = "";
       this.descriptionValue = "";
       this.selected = "New";
-      this.isValidDes = null;
-      this.isValidTodo = null;
-      this.isStatusState = false;
       this.$v.$reset();
     },
     onEdit(item, index) {
@@ -413,9 +399,6 @@ export default {
       this.isModal = false;
       this.title = this.$t('title.modal.edit');
       console.log("when click edit icon: ", item);
-    },
-    changeBackground() {
-      this.checked ? (this.background = "dark") : (this.background = "light");
     },
     changeWidthCol(key) {
       if (key === "todo") return "90px";
@@ -493,19 +476,13 @@ export default {
           desc: this.descriptionValue,
           status: this.selected,
         });
-
         this.$toast.success("Edit successfully!");
+        
       }
       // Hide the modal manually
       this.$nextTick(() => {
         this.$bvModal.hide("modal-1");
       });
-    },
-    nameKeydown(e) {
-      if (this.todoValue.length === 0) this.isValidTodo = null;
-    },
-    descKeyDown(e) {
-      if (this.descriptionValue.length === 0) this.isValidDes = null;
     },
     checkShowDetails(index, showDetailState) {
       this.$store.commit({
@@ -523,6 +500,8 @@ export default {
           item.description == this.descriptionValue
         ) {
           this.ischeckDuplicate = true;
+          
+
         }
       });
     },
@@ -530,6 +509,43 @@ export default {
       this.sortState = null;
     },
   },
+  beforeCreate(){
+    console.log('beforeCreate',this)
+    setTimeout(()=>{
+      // this.isloading = false;
+      this.$store.commit('SET_LOADING', false)
+    }, 100)
+  },
+  created(){
+    console.log('created')
+    setTimeout(() => {
+      this.items;
+      this.isBusy = false;
+    }, 1500);
+  },
+  beforeMount(){
+    console.log('beforemount', this.$v)
+  },
+  mounted() {
+    console.log('mounted')
+
+  },
+  beforeUpdate(){
+    console.log('beforeUpdate')
+    // this.isBusy = true;
+  },
+  updated(){
+    console.log('updated')
+    // this.isBusy = false;
+  },
+  beforeDestroy(){
+    console.log('beforeDestroy')
+    // this.isloading = true
+  },
+  destroyed(){
+    console.log('destroyed')
+    // this.isloading = false
+  }
 };
 </script>
 

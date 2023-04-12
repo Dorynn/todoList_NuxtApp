@@ -17,9 +17,13 @@
         },
         "headerDefault": {
             "user": {
-                "label": "Người dùng",
+                "label": "Trang cá nhân",
                 "profile": "Hồ sơ",
                 "sign-out": "Đăng xuất"
+            },
+            "search":{
+                "label":"Tìm kiếm",
+                "placeholder": "Nhập để tìm kiếm"
             }
         },
         "personal-page": {
@@ -33,7 +37,7 @@
                 "email": "E-mail",
                 "city": "Thành phố",
                 "street": "Đường",
-                "suite": "Suite",
+                "suite": "Dãy",
                 "company": "Tên công ty",
                 "catch": "Slogan"
             },

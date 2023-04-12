@@ -11,6 +11,17 @@ export default() => new Vuex.Store( {
         todos: todos,
         users: users
     },
+    state:{
+        isloading: true,
+    },
+    getters:{
+
+    },
+    mutations:{
+        SET_LOADING (state, loadpay){
+            state.isloading = loadpay
+        }
+    }
     // actions:{
     //     async fetchData({dispatch}){
     //         await Promise.all([

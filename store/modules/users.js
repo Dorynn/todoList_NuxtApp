@@ -10,12 +10,12 @@ const usersInfo ={
             state.users = users;
         }
     }, 
-    // action:{
-    //     async getUserInfo({commit}){
-    //         const response = await this.$axios.get('https://jsonplaceholder.typicode.com/users')
-    //         commit('SET_USERS', response.data)
-    //     }
-    // }
+    action:{
+        async getUserInfo({commit}){
+            const response = await this.$axios.get('https://jsonplaceholder.typicode.com/users')
+            commit('SET_USERS', response.data)
+        }
+    }
 }
 
 export default usersInfo

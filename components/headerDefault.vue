@@ -28,22 +28,22 @@
             <b-form-input
               size="sm"
               class="mr-sm-2"
-              placeholder="Search"
+              :placeholder="$t('title.headerDefault.search.placeholder') "
             ></b-form-input>
             <b-button size="sm" class="my-2 my-sm-0" type="submit"
-              >Search</b-button
+              >{{ $t('title.headerDefault.search.label') }}</b-button
             >
           </b-nav-form>
           <!-- <nuxt-link to="/todoPage/userProfile"> Sign out </nuxt-link> -->
           <switch-language />
           <b-nav-item-dropdown right>
-            <template #button-content> User </template>
+            <template #button-content> {{ $t('title.headerDefault.user.label') }} </template>
             <b-dropdown-item href="">
               <nuxt-link :to="localePath('/todoPage/userProfile/user0')">
-                Profile
+                {{ $t('title.headerDefault.user.profile') }}
               </nuxt-link>
             </b-dropdown-item>
-            <b-dropdown-item href=""> Sign out </b-dropdown-item>
+            <b-dropdown-item href=""> {{ $t('title.headerDefault.user.sign-out') }} </b-dropdown-item>
           </b-nav-item-dropdown>
         </b-navbar-nav>
       </b-collapse>
