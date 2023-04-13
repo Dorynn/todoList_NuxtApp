@@ -1,3 +1,4 @@
+import axios from 'axios'
 const images = {
     state: {
         images: []
@@ -13,7 +14,7 @@ const images = {
     actions:{
         async getImages({commit}){
             try{
-                const response = await this.$axios.get('https://jsonplaceholder.typicode.com/photos')
+                const response = await axios.get('https://jsonplaceholder.typicode.com/photos')
                     commit('SET_IMAGES', response.data)
             }catch(error){
                     console.log(error)

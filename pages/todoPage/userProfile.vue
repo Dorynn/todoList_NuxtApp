@@ -1,11 +1,11 @@
 <template>
   <div>
-    <!-- <p v-if="isloading">Loading</p> -->
-    <div>
+    <p v-if="images.length==0">Loading...</p>
+    <div v-else>
 
-    <nuxt-child :users="users" :userID="userID" />
+    <nuxt-child :userID="userID" />
     <div class="otherUser">
-      <h4>Other user</h4>
+      <h4>{{ $t('title.personal-page.other-user') }}</h4>
       <div class="listUser">
         <img
         :src="images[Math.floor(Math.random() * 9) + userID].url"
@@ -20,11 +20,9 @@
           @click="showProfile"
         />
       </div>
-      <p>{{ images[userID].url }}</p>
     </div>
-          
   </div>
-  </div>
+</div>
 </template>
 
 <script>
@@ -36,26 +34,13 @@ export default {
       titleTemplate: "User Profile - %s",
     };
   },
-  async asyncData(context) {
-    let users = await context.$axios.$get(
-      "https://jsonplaceholder.typicode.com/users"
-    );
-    return {
-      users,
-    };
-  },
   data() {
     return {
       userID: 0,
     };
   },
-  
-  async fetch ({store}){
-    await store.dispatch('getImages');
-    // await store.dispatch('getUsersInfo');
-  },
   computed:{
-    ...mapGetters(['images'])
+    ...mapGetters(["images", "users"])
   },
   methods: {
     showProfile() {
@@ -64,17 +49,14 @@ export default {
       this.$router.push(`/todoPage/userProfile/user${this.userID}`);
       console.log("active");
     },
-    // ...mapActions('users',['getUserInfo']),
-    // ...mapActions('images', ['getImages'])
+    ...mapActions(["getImages", "getUserInfo"]),
   },
   created(){
-    // await this.$store.dispatch('getImages')
-    // await this.$store.dispatch('getUserInfo')
-    
-    // setTimeout(() => {
-    //   this.isloading = false
-    // }, 1000);
+    this.getImages();
+    this.getUserInfo();
   },
+  mounted(){
+  }
 };
 </script>
 

@@ -41,13 +41,21 @@
                 "company": "Tên công ty",
                 "catch": "Slogan"
             },
-            "other user": "Người dùng khác"
+            "other-user": "Người dùng khác",
+            "task-statistics": {
+                "label": "Thống kê công việc",
+                "completedTask": "Công việc đã hoàn thành",
+                "inprogressTask": "Công việc đang tiến hành",
+                "newTask": "Công việc mới",
+                "totalTask": "Tổng số công việc"
+            }
         }
     },
     "field-tasklist": {
         "todo": {
             "label": "Nhiệm vụ",
-            "sort-placeholder": "Nhập từ khóa để tìm kiếm"
+            "sort-placeholder": "Nhập từ khóa để tìm kiếm",
+            "placeholder": "Nhập công việc của bạn..."
         },
         "status": {
             "label": "Trạng thái",
@@ -59,7 +67,8 @@
             "sort-placeholder": "Nhập từ khóa để tìm kiếm"
         },
         "description": {
-            "label": "Mô tả"
+            "label": "Mô tả",
+            "placeholder":"Nhập mô tả cho công việc của bạn..."
         },
         "delete": {
             "label": "Xóa"

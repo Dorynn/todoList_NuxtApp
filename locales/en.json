@@ -41,13 +41,21 @@
                 "company": "Company name",
                 "catch": "Catch Phrase"
             },
-            "other user": "Other user"
+            "task-statistics": {
+                "label": "Task Statistics",
+                "completedTask": "Completed task",
+                "inprogressTask": "Inprogress task",
+                "newTask": "New task",
+                "totalTask": "Total task"
+            },
+            "other-user": "Other user"
         }
     },
     "field-tasklist":{
         "todo":{
             "label": "Task",
-            "sort-placeholder": "Type to Search"
+            "sort-placeholder": "Type to Search",
+            "placeholder": "Enter your task..."
         },
         "status":{
             "label":"Status",
@@ -59,7 +67,8 @@
             "sort-placeholder": "Type to Search"
         },
         "description":{
-            "label":"Description"
+            "label":"Description",
+            "placeholder": "Enter your task description..."
         },
         "delete":{
             "label":"Delete"

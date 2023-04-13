@@ -1,3 +1,4 @@
+import axios from 'axios'
 const usersInfo ={
     state:{
         users:[]
@@ -10,10 +11,15 @@ const usersInfo ={
             state.users = users;
         }
     }, 
-    action:{
+    actions:{
         async getUserInfo({commit}){
-            const response = await this.$axios.get('https://jsonplaceholder.typicode.com/users')
-            commit('SET_USERS', response.data)
+            try{
+                const response = await axios.get('https://jsonplaceholder.typicode.com/users')
+                    commit('SET_USERS', response.data)
+            }catch(error){
+                    console.log(error)
+                }
+                
         }
     }
 }

@@ -1,6 +1,8 @@
 <template>
-  <div class="wrapper">
-      <!-- <h2>Your page {{ $route.params.user }} is active</h2> -->
+  <div>
+    <p v-if="users.length==0">Loading...</p>
+    <div class="wrapper" v-else>
+      <h2>Your page {{ $route.params.user }} is active</h2>
       <b-row align-h="between" class="container">
         <b-col class="professionalDetail" cols="4">
           <h4 class="info">{{ $t('title.personal-page.professional-detail') }}</h4>
@@ -65,18 +67,21 @@
               <p class="infContent">{{ users[userID].company.catchPhrase }}</p>
             </b-col>
           </b-row>
-          <h4 class="info">I'm web developer</h4>
+          <h4 class="info">{{ $t('title.personal-page.task-statistics.label') }}</h4>
           <hr>
-          <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Recusandae soluta consectetur ipsam, quidem dolores neque eveniet veniam quae officiis aliquid sapiente omnis earum qui quasi, placeat, voluptate error! Non quo facere dolore tenetur quis adipisci?</p>
-    <p>{{ $t('welcome') }}</p>
+          <p>{{$t('title.personal-page.task-statistics.completedTask')}}: {{ completedTask }}</p>
+          <p>{{$t('title.personal-page.task-statistics.inprogressTask')}}: {{ inprogressTask }}</p>
+          <p>{{$t('title.personal-page.task-statistics.newTask')}}: {{ newTask }}</p>
+          <p>{{$t('title.personal-page.task-statistics.totalTask')}}: {{items.length }}</p>
 
         </b-col>
       </b-row>
     </div>
-  </template>
+  </div>  
+</template>
   
   <script>
-import { mapGetters } from 'vuex';
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
   export default {
     head(){
       return{
@@ -84,15 +89,22 @@ import { mapGetters } from 'vuex';
       }
     },
     props:{
-        users: Array,
         userID: {
           type:Number,
           default:0,
         }
     },
     computed: {
-      ...mapGetters(['images'])
+      ...mapGetters(['images', 'users', 'completedTask', 'inprogressTask', 'newTask', 'items']),
 
+    },
+    methods:{
+      ...mapActions(['getImages', 'getUserInfo', 'getTodos']),
+    },
+    created(){
+      this.getUserInfo();
+      this.getImages();
+      this.getTodos();
     }
 
   };

@@ -21,13 +21,6 @@ export default() => new Vuex.Store( {
         SET_LOADING (state, loadpay){
             state.isloading = loadpay
         }
+
     }
-    // actions:{
-    //     async fetchData({dispatch}){
-    //         await Promise.all([
-    //             dispatch('images/fetchData'),
-    //             dispatch('users/fetchData')
-    //         ])
-    //     }
-    // }
 })
