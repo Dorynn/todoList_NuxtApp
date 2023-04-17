@@ -10,9 +10,9 @@ export default {
     ],
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
-      { rel: 'preconnect', href:"https://fonts.googleapis.com"},
-      { rel: 'preconnect', href:"https://fonts.gstatic.com", crossorigin:''},
-      { rel: 'stylesheet', href:"https://fonts.googleapis.com/css2?family=Delicious+Handrawn&family=Encode+Sans+Expanded:wght@300&family=Jost:wght@200;300&family=Open+Sans&family=Shadows+Into+Light&display=swap"},
+      { rel: 'preconnect', href: "https://fonts.googleapis.com" },
+      { rel: 'preconnect', href: "https://fonts.gstatic.com", crossorigin: '' },
+      { rel: 'stylesheet', href: "https://fonts.googleapis.com/css2?family=Delicious+Handrawn&family=Encode+Sans+Expanded:wght@300&family=Jost:wght@200;300&family=Open+Sans&family=Shadows+Into+Light&display=swap" },
     ]
   },
 
@@ -24,10 +24,10 @@ export default {
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
-    {src:'~/plugins/toast_notif.js', mode:'client'},
-    {src:'~/plugins/v-tooltip.js', mode:'client'},
-    {src:'~/plugins/click_outside.js', mode:'client'},
-    {src:'~/plugins/vuelidate.js', mode:'client'},
+    { src: '~/plugins/toast_notif.js', mode: 'client' },
+    { src: '~/plugins/v-tooltip.js', mode: 'client' },
+    { src: '~/plugins/click_outside.js', mode: 'client' },
+    { src: '~/plugins/vuelidate.js' },
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -56,11 +56,11 @@ export default {
     '@nuxt/content',
     '@nuxtjs/i18n',
   ],
-  i18n:{
-    strategy:'no_prefix',
-    langDir:'locales'
+  i18n: {
+    strategy: 'no_prefix',
+    langDir: 'locales'
     ,
-    locales:[
+    locales: [
       {
         code: 'en',
         iso: 'en',
@@ -75,8 +75,8 @@ export default {
       }
     ],
     defaultLocale: 'en',
-    vueI18n:{
-      fallbackLocale:'en',
+    vueI18n: {
+      fallbackLocale: 'en',
     },
   },
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
@@ -94,21 +94,21 @@ export default {
 
   // Content module configuration: https://go.nuxtjs.dev/config-content
   content: {},
-  // ssr: false,
+  ssr: false,
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
-    loaders:{
-      sass:{
+    loaders: {
+      sass: {
         implementation: require('sass'),
       },
-      scss:{
+      scss: {
         implementation: require('sass'),
       },
     }
   },
 
-  server:{
+  server: {
     port: 8000
   }
 }

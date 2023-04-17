@@ -2,27 +2,7 @@ import axios from 'axios'
 const taskList = {
     state: {
         items: [
-            // {
-            //     id: 1,
-            //     todo: "english",
-            //     status2: "New",
-            //     description: "hihi",
-            //     _showDetails: false,
-            // },
-            // {
-            //     id: 2,
-            //     todo: "math",
-            //     status2: "Inprogress",
-            //     description: "do it",
-            //     _showDetails: false,
-            // },
-            // {
-            //     id: 3,
-            //     todo: "physics",
-            //     status2: "Done",
-            //     description: "physics desc",
-            //     _showDetails: false,
-            // },
+
         ],
 
     },

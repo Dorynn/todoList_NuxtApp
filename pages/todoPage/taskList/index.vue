@@ -1,8 +1,6 @@
 <template>
   <div>
-    <p v-if="isloading">Loading....</p>
-
-    <div id="homePage" v-else>
+    <div id="homePage">
       <h1 class="title">{{ $t("title.task-list") }}</h1>
       <div class="control">
         <b-button
@@ -17,36 +15,39 @@
           id="modal-1"
           :ref="changeModal"
           :title="title"
-          @ok="handleOk($event, changeModal)"
-          @hidden="resetInfoModal"
-          :cancel-title="$t('action.cancel-btn.label')"
           :ok-title="$t('action.ok-btn.label')"
+          :cancel-title="$t('action.cancel-btn.label')"
+          :ok-disabled="isOk "
+          @ok="handleSubmit(changeModal)"
+          @hidden="resetInfoModal"
         >
-          <form ref="form" @submit.stop.prevent="handleSubmit">
+          <form >
+            <switch-language />
             <!-- <pre>{{ $v?.todoValue }}</pre> -->
             <div class="input-block">
               <label class="input_label">{{
                 $t("field-tasklist.todo.label")
               }}</label>
               <input
-                class="input_field"
-                v-model.trim.lazy="$v.todoValue.$model"
-                @blur="checkDuplicateData()"
+                class="input_field pl-1"
+                v-model.trim="$v.todoValue.$model"
+                @blur="todoBlur()"
                 :placeholder="$t('field-tasklist.todo.placeholder')"
+                @keyup="todoKeyUp()"
               />
             </div>
             <small
               class="error"
-              v-if="!$v.todoValue.required && $v.todoValue.$error"
+              v-if="!$v?.todoValue.required && $v?.todoValue.$error && isValidTodo"
               >{{ $t("messages.error.required") }}</small
             >
-            <small class="error" v-if="!$v.todoValue.minLength">{{
+            <small class="error" v-if="!$v?.todoValue.minLength && isValidTodo">{{
               $t("messages.error.minLength")
             }}</small>
-            <small class="error" v-if="!$v.todoValue.maxLength">{{
+            <small class="error" v-if="!$v?.todoValue.maxLength && isValidTodo">{{
               $t("messages.error.maxLength")
             }}</small>
-            <small class="error" v-if="!$v.todoValue.format">{{
+            <small class="error" v-if="!$v?.todoValue.format && isValidTodo">{{
               $t("messages.error.special-characters")
             }}</small>
             <!-- <pre>{{ $v.descriptionValue }}</pre> -->
@@ -56,40 +57,37 @@
                 $t("field-tasklist.description.label")
               }}</label>
               <textarea
-                class="input-field"
-                v-model.trim.lazy="$v.descriptionValue.$model"
-                @blur="checkDuplicateData()"
+                class="input-field pl-1"
+                v-model.trim="$v.descriptionValue.$model"
+                @blur="descriptionBlur()"
+
                 :placeholder="$t('field-tasklist.description.placeholder')"
               ></textarea>
             </div>
 
             <small
               class="error"
-              v-if="!$v.descriptionValue.required && $v.descriptionValue.$error"
+              v-if="
+                !$v?.descriptionValue.required && $v?.descriptionValue.$error && isValidDescription
+              "
               >{{ $t("messages.error.required") }}</small
             >
-            <small class="error" v-if="!$v.descriptionValue.minLength">{{
+            <small class="error" v-if="!$v?.descriptionValue.minLength && isValidDescription">{{
               $t("messages.error.minLength")
             }}</small>
-            <small class="error" v-if="!$v.descriptionValue.maxLength">{{
+            <small class="error" v-if="!$v?.descriptionValue.maxLength && isValidDescription">{{
               $t("messages.error.maxLength")
             }}</small>
-            <small class="error" v-if="!$v.descriptionValue.format">{{
+            <small class="error" v-if="!$v?.descriptionValue.format && isValidDescription">{{
               $t("messages.error.special-characters")
             }}</small>
             <!-- <pre>{{ $v.selected }}</pre> -->
 
-            <div
-              class="input-block"
-              :class="{ 'form-group--error': $v.selected.$error }"
-            >
+            <div class="input-block">
               <label class="input-label">{{
                 $t("field-tasklist.status.label")
               }}</label>
-              <select
-                v-model.lazy="$v.selected.$model"
-                @change="checkDuplicateData()"
-              >
+              <select v-model="$v.selected.$model" @change="checkDuplicateData()">
                 <option value="New">
                   {{ $t("field-tasklist.status.value.new") }}
                 </option>
@@ -126,6 +124,10 @@
         :no-sort-reset="true"
         :current-page="currentPage"
         :per-page="perPage"
+        :busy="isBusy"
+        :sort-by.sync="sortState"
+        :sort-desc.sync="sortDesc"
+        @filtered="onFiltered"
         show-empty
         bordered
         table-class="w-50"
@@ -134,10 +136,7 @@
         striped
         fixed
         thead-class="thead-primary"
-        :busy="isBusy"
         v-click-outside="onClickOutside"
-        :sort-by.sync="sortState"
-        :sort-desc.sync="sortDesc"
       >
         <template #table-colgroup="scope">
           <col
@@ -185,7 +184,7 @@
             :class="{ active: data.item.status2 === 'Done' }"
             class="todoContent"
             v-b-tooltip.hover
-            :title="$t('action.hover.see-detail')"
+            :title="data.value"
           >
             {{ data.value }}
           </p>
@@ -229,18 +228,28 @@
             <font-awesome-icon :icon="['fas', 'pen-to-square']" />
           </div>
         </template>
-        <template #head(delete)>{{
-          $t("field-tasklist.delete.label")
-        }}</template>
+        <template #head(delete)>
+          {{ $t("field-tasklist.delete.label") }}</template
+        >
         <template #cell(delete)="data3">
-          <div
-            @click="deleteTask(data3.item.id)"
-            id="deleteBtn"
-            class="iconBtn"
-            v-tooltip.hover="$t('action.hover.delete-btn')"
-          >
+          <!-- @click="deleteTask(data3.item.id)" -->
+          <div id='deleteBtn' class="iconBtn" @click="deleteTodo(data3.item.id)">
+            <!-- v-tooltip.hover="$t('action.hover.delete-btn')" -->
             <font-awesome-icon :icon="['fas', 'trash-can']" />
+            <!-- <p>{{ data3.item.id }}</p> -->
+            <b-popover
+              target='deleteBtn'
+              triggers="click"
+              >
+              <!-- placement="auto"
+        container="my-container" -->
+              <!-- @show="onShow"
+        @shown="onShown"
+        @hidden="onHidden" -->
+              <template #title> Interactive Content </template>
+            </b-popover>
           </div>
+
         </template>
 
         <template #row-details="row">
@@ -270,7 +279,7 @@
           </b-card>
         </template>
       </b-table>
-      <b-pagination 
+      <b-pagination
         v-model="currentPage"
         :total-rows="rows"
         :per-page="perPage"
@@ -279,9 +288,9 @@
         align="center"
         small
       >
-    </b-pagination>
-    <p>Current Page: {{ currentPage }}</p>
-    <p>Total rows: {{ rows }}</p>
+      </b-pagination>
+      <p>Current Page: {{ currentPage }}</p>
+      <p id="totalRows">Total rows: {{ rows }}</p>
     </div>
   </div>
 </template>
@@ -296,11 +305,14 @@ import {
   maxLength,
   helpers,
 } from "vuelidate/lib/validators";
+import switchLanguage from "~/components/switchLanguage.vue";
+import { get } from "http";
 const format = helpers.regex(
   "format",
   /^(?=.{0,}$)[A-Za-zÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂẾưăạảấầẩẫậắằẳẵặẹẻẽềềểếỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ0-9]+(?:\s[A-Za-zÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂẾưăạảấầẩẫậắằẳẵặẹẻẽềềểếỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ0-9]+)*$/
 );
 export default {
+  components: { switchLanguage },
   name: "IndexPage",
   head: {
     title: "Task List",
@@ -308,16 +320,19 @@ export default {
 
   data() {
     return {
-      // isloading: true,
-      perPage: 5,
-      currentPage: 1,
-      sortDesc: false,
-      sortState: null,
-      ischeckDuplicate: false,
-      isBusy: true,
-      indexRowDetail: 0,
-      title: "",
-      isSorted: false,
+      isOktemp: true,
+      isValidTodo:false,
+      isValidDescription:false,
+      taskId: "",
+      rows: null, // (number) store the total number of current in the table
+      perPage: 5, // (number) store the number of rows per page
+      currentPage: 1, // (number) record the current page
+      sortDesc: false, // (bool) record the descending order state (true: descending, false: ascending)
+      sortState: null, // (string) record the field being sorted, example (sortState = 'todo')
+      ischeckDuplicate: false, // (bool) record the duplicate status of data (true: duplicated, false: no duplicated)
+      isBusy: true, // (bool) record the busy state of table (true: busy, false: no busy)
+      indexRowDetail: 0, // (number) as a temporary to store the old row detail index
+      title: "", // (string) record the title of the modal
       checked: false,
       todoValue: "",
       descriptionValue: "",
@@ -380,8 +395,10 @@ export default {
     ...mapGetters(["items"]),
     changeSearchField() {
       if (this.isColFilter) {
+        this.status2SearchInput = "";
         return ["todo"];
       } else {
+        this.todoSearch = "";
         return ["status2"];
       }
     },
@@ -389,23 +406,32 @@ export default {
       if (this.isColFilter) {
         return this.todoSearch;
       } else {
-        console.log("this is statusSearchInput: ", this.status2SearchInput);
         return this.status2SearchInput;
       }
     },
     changeModal() {
       return this.isModal ? "modal1" : "modal2";
     },
-    rows(){
-      return this.items.length
+    isOk:{
+      get(){
+        return this.isOktemp
+      },
+      set(val){
+        this.isOktemp = val
+      },
     }
   },
   watch: {
     todoValue() {
-      console.log("change: ", this.$v.todoValue.$error);
-      console.log("change: ", this.$v.descriptionValue.$error);
-      console.log("change: ", this.$v.selected.$error);
+      console.log("change todo: ", this.$v.todoValue.$error);
     },
+    descriptionValue(){
+      console.log("change desc: ", this.$v.descriptionValue.$error);
+    },
+    selected(){
+      console.log("change status: ", this.$v.selected.$error);
+
+    }, 
     checked() {
       this.checked ? (this.background = "dark") : (this.background = "light");
     },
@@ -415,6 +441,15 @@ export default {
     sortState() {
       console.log(this.sortState);
     },
+    taskId(){
+      console.log(this.taskId)
+    },
+    // isOk(){
+    //   console.log('isoke...........')
+    // }
+    ischeckDuplicate(){
+      console.log('duplicate: ', this.ischeckDuplicate)
+    }
   },
 
   methods: {
@@ -436,6 +471,7 @@ export default {
       this.descriptionValue = item.description;
       this.selected = item.status2;
       this.isModal = false;
+      this.isOk = true;
       this.title = this.$t("title.modal.edit");
       console.log("when click edit icon: ", item);
     },
@@ -457,6 +493,7 @@ export default {
 
     changeIsModalAdd() {
       this.isModal = true;
+      this.isOk = true;
       this.title = this.$t("title.modal.add");
     },
     setIsStatus2Filter() {
@@ -476,25 +513,10 @@ export default {
         return "red";
       }
     },
-    handleOk(bvModalEvent, ref) {
-      // Prevent modal from closing
-      // Trigger submit handler
-      this.$v.$touch();
-      this.checkDuplicateData();
-      this.handleSubmit(ref);
-      bvModalEvent.preventDefault();
-      console.log(bvModalEvent);
-    },
     handleSubmit(ref) {
       // Exit when the form isn't valid
-      if (
-        this.$v.todoValue.$error ||
-        this.$v.descriptionValue.$error ||
-        this.$v.selected.$error ||
-        this.ischeckDuplicate
-      ) {
-        return;
-      }
+
+
       // Push the new data row
       if (ref === "modal1") {
         const data = {
@@ -507,7 +529,7 @@ export default {
         this.addTask(data);
         this.toast("b-toaster-top-center", "success");
       } else {
-        console.log(this);
+        // console.log(this);
         this.editTask({
           index: this.curIndex,
           item: {
@@ -526,22 +548,27 @@ export default {
       });
     },
     checkShowDetails(index, showDetailState) {
-      console.log("in check detail: ", this.items);
+      // console.log("in check detail: ", this.items);
       this.items[this.indexRowDetail]._showDetails = false;
       this.sortDesc
         ? this.SORT_ITEMS_DESCENDING(this.sortState)
         : this.SORT_ITEMS_ASCENDING(this.sortState);
-      console.log("in check detail after: ", this.items);
-      this.indexRowDetail = index + this.perPage*(this.currentPage-1);
-      console.log('this index', index)
+      // console.log("in check detail after: ", this.items);
+      this.indexRowDetail = index + this.perPage * (this.currentPage - 1);
+      // console.log("this index", index);
       if (showDetailState) {
-        this.items[index + this.perPage*(this.currentPage-1)]._showDetails = false;
+        this.items[
+          index + this.perPage * (this.currentPage - 1)
+        ]._showDetails = false;
       } else {
-        this.items[index + this.perPage*(this.currentPage-1)]._showDetails = true;
+        this.items[
+          index + this.perPage * (this.currentPage - 1)
+        ]._showDetails = true;
       }
     },
     checkDuplicateData() {
       this.ischeckDuplicate = false;
+      this.$v.$touch()
       this.items.forEach((item) => {
         if (
           item.todo == this.todoValue &&
@@ -551,6 +578,19 @@ export default {
           this.ischeckDuplicate = true;
         }
       });
+
+      if (
+        !this.$v.todoValue.$error &&
+        !this.$v.descriptionValue.$error &&
+        !this.$v.selected.$error &&
+        !this.ischeckDuplicate
+      ) {
+        this.isOk = false
+      }else{
+        this.isOk = true
+      }
+
+      
     },
     onClickOutside() {
       this.sortState = null;
@@ -561,42 +601,67 @@ export default {
         return this.$t("field-tasklist.status.value.inprogress");
       if (val === "Done") return this.$t("field-tasklist.status.value.done");
     },
+    onFiltered(filteredItems) {
+      this.currentPage = 1;
+      this.rows = filteredItems.length;
+    },
+    deleteTodo(id) {
+      // console.log("delete: ", id);
+      this.taskId = id;
+      // console.log(this.taskId);
+    },
+    todoBlur(){
+      if(!this.$v?.todoValue.required && this.$v?.todoValue.$error || !this.$v?.todoValue.minLength || !this.$v?.todoValue.format){
+        this.isValidTodo = true
+      }else{
+        this.isValidTodo = false
+      }
+      this.checkDuplicateData();
+    },
+    todoKeyUp(){
+    },
+    descriptionBlur(){
+      if(!this.$v?.descriptionValue.required && this.$v?.descriptionValue.$error || !this.$v?.descriptionValue.minLength || !this.$v?.descriptionValue.format){
+        this.isValidDescription = true
+      }else{
+        this.isValidDescription = false
+      }
+      this.checkDuplicateData();
+    },
   },
   beforeCreate() {
-    console.log("beforeCreate", this.isBusy);
-    setTimeout(() => {
-      this.$store.commit("SET_LOADING", false);
-    }, 1);
+    // console.log("beforeCreate", this.isBusy);
+    // setTimeout(() => {
+    //   this.$store.commit("SET_LOADING", false);
+    // }, 1);
   },
   created() {
-    console.log("created", this.isBusy);
+    // console.log(this.$v);
     this.getTodos();
   },
   beforeMount() {
-    // if(this.items.length==0)
-    //   this.isBusy = true
-    console.log('before mount',this.items.length, this.isBusy)
+    // console.log("before mount", this.items.length, this.isBusy);
   },
   mounted() {
-    console.log('mount',this.items.length, this.isBusy)
-    console.log("mounted");
+    // console.log("mount", this.items.length, this.isBusy);
+    // let totalrows = document.getElementById("totalRows");
+
+    // console.log("mounted", totalrows);
   },
   beforeUpdate() {
-    console.log("beforeUpdate", this.items.length, this.isBusy);
+    // console.log("beforeUpdate", this.items.length, this.isBusy, this.rows);
+    if (this.rows == null && this.items.length > 0)
+      this.rows = this.items.length;
   },
   updated() {
-    this.isBusy = false
-    // this.isBusy = true;
-    console.log("updated", this.isBusy);
-    // this.isBusy = false;
+    this.isBusy = false;
+    // console.log("updated", this.isBusy, this.items.length, this.rows);
   },
   beforeDestroy() {
-    console.log("beforeDestroy");
-    // this.isloading = true
+    // console.log("beforeDestroy");
   },
   destroyed() {
-    console.log("destroyed");
-    // this.isloading = false
+    // console.log("destroyed");
   },
 };
 </script>
@@ -639,7 +704,7 @@ export default {
       }
     }
   }
-  .pagination{
+  .pagination {
     // margin-top: 30px;
   }
 }
@@ -656,7 +721,7 @@ export default {
   background-color: rgba(39, 37, 37, 0.705);
   color: #ffffff;
 }
-.input-block{
+.input-block {
   display: flex;
   flex-direction: column;
 }
