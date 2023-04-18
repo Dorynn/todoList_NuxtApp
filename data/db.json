@@ -1,129 +1,31 @@
 {
   "items": [
     {
-      "id": "ea1385ac-1761-4bf6-a4b2-4604c956e57f",
-      "todo": "fasdf",
-      "status2": "New",
-      "description": "give an example",
-      "_showDetails": false
-    },
-    {
-      "id": "18a43367-47b1-41dc-b18f-2d0fa312c9c0",
-      "todo": "task 4",
-      "status2": "New",
-      "description": "do it",
-      "_showDetails": false
-    },
-    {
-      "id": "9f9eabb1-3a02-4634-bf56-7fc4c720062f",
-      "todo": "task 3",
-      "status2": "Inprogress",
-      "description": "do the homework",
-      "_showDetails": false
-    },
-    {
-      "id": "3bc0f503-3783-46ec-af2a-8badfc7dc279",
-      "todo": "task 1",
-      "status2": "New",
-      "description": "desciption task 1",
-      "_showDetails": false
-    },
-    {
-      "id": "25fa0c8b-b15a-4980-a467-7a9112a22348",
-      "todo": "task 2",
-      "status2": "Inprogress",
-      "description": "description task 2",
-      "_showDetails": false
-    },
-    {
-      "id": "53e3cc04-a6c0-4423-9388-6573e5837d06",
+      "id": "4",
       "todo": "task 3",
       "status2": "New",
       "description": "description task 3",
       "_showDetails": false
     },
     {
-      "id": "491fcc82-4a6d-4c89-b0d7-07e1e5e1cdaa",
+      "id": "5",
       "todo": "task 5",
       "status2": "New",
       "description": "description task 5",
       "_showDetails": false
     },
     {
-      "id": "de1017e5-46ef-4894-a0fe-761170f488a9",
-      "todo": "task 6",
-      "status2": "New",
-      "description": "description task 6",
-      "_showDetails": false
-    },
-    {
-      "id": "3c3e0d18-81fd-40c9-be3e-b71d14b572e1",
-      "todo": "english",
-      "status2": "New",
-      "description": "grammar",
-      "_showDetails": false
-    },
-    {
-      "id": "a8399768-50a2-4c92-bb7c-95751cb33da3",
-      "todo": "math",
-      "status2": "New",
-      "description": "do the housework",
-      "_showDetails": false
-    },
-    {
-      "id": "6ca1d2f5-0275-4d45-a95e-2c4bdcca8c79",
-      "todo": "physics",
-      "status2": "Inprogress",
-      "description": "do the experience",
-      "_showDetails": false
-    },
-    {
-      "id": "314e531b-9d4f-40fa-aca1-0996d24671aa",
-      "todo": "sadf",
-      "status2": "New",
-      "description": "asgd",
-      "_showDetails": false
-    },
-    {
-      "id": "74a5c4fc-18de-4df0-b26c-65b90839fdd9",
-      "todo": "23",
-      "status2": "New",
-      "description": "326",
-      "_showDetails": false
-    },
-    {
-      "id": "8148543d-5f58-4f32-99e2-473fae91b617",
-      "todo": "dagsd",
-      "status2": "New",
-      "description": "sfagd",
-      "_showDetails": false
-    },
-    {
-      "id": "e85f7ffb-a1eb-4937-bded-6eea84a8566e",
-      "todo": "as",
-      "status2": "New",
-      "description": "ag",
-      "_showDetails": false
-    },
-    {
-      "id": "007dd943-f7ce-4f98-90a8-08c8d08b3ced",
-      "todo": "task 4",
-      "status2": "New",
-      "description": "do now",
-      "_showDetails": false
-    },
-    {
-      "id": "e519fdc9-6bb5-433a-b9e4-c820e43d79bb",
+      "id": "17",
       "todo": "asdg",
-      "status2": "New",
+      "status2": "Inprogress",
       "description": "agd",
       "_showDetails": false
     },
     {
-      "id": "7c416bc5-8c0f-44cc-bddc-c1f8c6bb7445",
-      "todo": "aasg",
+      "id": "6b287702-13bf-47be-aa0f-d57aaf8150d5",
+      "todo": "task 5",
       "status2": "New",
-      "description": "asg",
+      "description": "description task",
       "_showDetails": false
     }
   ]

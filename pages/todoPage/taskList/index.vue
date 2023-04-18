@@ -17,11 +17,11 @@
           :title="title"
           :ok-title="$t('action.ok-btn.label')"
           :cancel-title="$t('action.cancel-btn.label')"
-          :ok-disabled="isOk "
+          :ok-disabled="isOk"
           @ok="handleSubmit(changeModal)"
           @hidden="resetInfoModal"
         >
-          <form >
+          <form>
             <switch-language />
             <!-- <pre>{{ $v?.todoValue }}</pre> -->
             <div class="input-block">
@@ -33,20 +33,25 @@
                 v-model.trim="$v.todoValue.$model"
                 @blur="todoBlur()"
                 :placeholder="$t('field-tasklist.todo.placeholder')"
-                @keyup="todoKeyUp()"
               />
             </div>
             <small
               class="error"
-              v-if="!$v?.todoValue.required && $v?.todoValue.$error && isValidTodo"
+              v-if="
+                !$v?.todoValue.required && $v?.todoValue.$error && isValidTodo
+              "
               >{{ $t("messages.error.required") }}</small
             >
-            <small class="error" v-if="!$v?.todoValue.minLength && isValidTodo">{{
-              $t("messages.error.minLength")
-            }}</small>
-            <small class="error" v-if="!$v?.todoValue.maxLength && isValidTodo">{{
-              $t("messages.error.maxLength")
-            }}</small>
+            <small
+              class="error"
+              v-if="!$v?.todoValue.minLength && isValidTodo"
+              >{{ $t("messages.error.minLength") }}</small
+            >
+            <small
+              class="error"
+              v-if="!$v?.todoValue.maxLength && isValidTodo"
+              >{{ $t("messages.error.maxLength") }}</small
+            >
             <small class="error" v-if="!$v?.todoValue.format && isValidTodo">{{
               $t("messages.error.special-characters")
             }}</small>
@@ -60,7 +65,6 @@
                 class="input-field pl-1"
                 v-model.trim="$v.descriptionValue.$model"
                 @blur="descriptionBlur()"
-
                 :placeholder="$t('field-tasklist.description.placeholder')"
               ></textarea>
             </div>
@@ -68,26 +72,37 @@
             <small
               class="error"
               v-if="
-                !$v?.descriptionValue.required && $v?.descriptionValue.$error && isValidDescription
+                !$v?.descriptionValue.required &&
+                $v?.descriptionValue.$error &&
+                isValidDescription
               "
               >{{ $t("messages.error.required") }}</small
             >
-            <small class="error" v-if="!$v?.descriptionValue.minLength && isValidDescription">{{
-              $t("messages.error.minLength")
-            }}</small>
-            <small class="error" v-if="!$v?.descriptionValue.maxLength && isValidDescription">{{
-              $t("messages.error.maxLength")
-            }}</small>
-            <small class="error" v-if="!$v?.descriptionValue.format && isValidDescription">{{
-              $t("messages.error.special-characters")
-            }}</small>
+            <small
+              class="error"
+              v-if="!$v?.descriptionValue.minLength && isValidDescription"
+              >{{ $t("messages.error.minLength") }}</small
+            >
+            <small
+              class="error"
+              v-if="!$v?.descriptionValue.maxLength && isValidDescription"
+              >{{ $t("messages.error.maxLength") }}</small
+            >
+            <small
+              class="error"
+              v-if="!$v?.descriptionValue.format && isValidDescription"
+              >{{ $t("messages.error.special-characters") }}</small
+            >
             <!-- <pre>{{ $v.selected }}</pre> -->
 
             <div class="input-block">
               <label class="input-label">{{
                 $t("field-tasklist.status.label")
               }}</label>
-              <select v-model="$v.selected.$model" @change="checkDuplicateData()">
+              <select
+                v-model="$v.selected.$model"
+                @change="checkDuplicateData()"
+              >
                 <option value="New">
                   {{ $t("field-tasklist.status.value.new") }}
                 </option>
@@ -100,7 +115,7 @@
               </select>
             </div>
           </form>
-          <small class="error" v-if="ischeckDuplicate">{{
+          <small class="error" v-if="ischeckDuplicate && isValidDescription && isValidTodo">{{
             $t("messages.error.duplicated")
           }}</small>
         </b-modal>
@@ -127,6 +142,7 @@
         :busy="isBusy"
         :sort-by.sync="sortState"
         :sort-desc.sync="sortDesc"
+        filter-debounce="500"
         @filtered="onFiltered"
         show-empty
         bordered
@@ -233,23 +249,27 @@
         >
         <template #cell(delete)="data3">
           <!-- @click="deleteTask(data3.item.id)" -->
-          <div id='deleteBtn' class="iconBtn" @click="deleteTodo(data3.item.id)">
-            <!-- v-tooltip.hover="$t('action.hover.delete-btn')" -->
-            <font-awesome-icon :icon="['fas', 'trash-can']" />
-            <!-- <p>{{ data3.item.id }}</p> -->
-            <b-popover
-              target='deleteBtn'
-              triggers="click"
-              >
-              <!-- placement="auto"
-        container="my-container" -->
-              <!-- @show="onShow"
-        @shown="onShown"
-        @hidden="onHidden" -->
-              <template #title> Interactive Content </template>
-            </b-popover>
-          </div>
+          <div
+            id="deleteBtn"
+            class="iconBtn deleteBtnWrapper"
+            @click.self.prevent="deleteTodo(data3.item.id)"
 
+          >
+            <!-- v-tooltip.hover="$t('action.hover.delete-btn')" -->
+            <font-awesome-icon @click="deleteTodo(data3.item.id)" :icon="['fas', 'trash-can']" />
+            <!-- <p>{{ data3.item.id }}</p> -->
+            <div
+              class="popover"
+              v-if="showPopover && taskId == data3.item.id"
+              v-click-outside="clickOutPopover"
+              >
+              
+              <small><strong>Are you sure?</strong></small>
+              <hr class="m-0"/>
+              <button class="buttonPopover" @click="hidePopover()">No</button>
+              <button class="buttonPopover" @click="deleteTask(data3.item.id)">Yes</button>
+            </div>
+          </div>
         </template>
 
         <template #row-details="row">
@@ -307,6 +327,7 @@ import {
 } from "vuelidate/lib/validators";
 import switchLanguage from "~/components/switchLanguage.vue";
 import { get } from "http";
+import { log } from "console";
 const format = helpers.regex(
   "format",
   /^(?=.{0,}$)[A-Za-zÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂẾưăạảấầẩẫậắằẳẵặẹẻẽềềểếỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ0-9]+(?:\s[A-Za-zÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂẾưăạảấầẩẫậắằẳẵặẹẻẽềềểếỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ0-9]+)*$/
@@ -321,8 +342,9 @@ export default {
   data() {
     return {
       isOktemp: true,
-      isValidTodo:false,
-      isValidDescription:false,
+      isShowPopover: false,
+      isValidTodo: false,
+      isValidDescription: false,
       taskId: "",
       rows: null, // (number) store the total number of current in the table
       perPage: 5, // (number) store the number of rows per page
@@ -412,26 +434,33 @@ export default {
     changeModal() {
       return this.isModal ? "modal1" : "modal2";
     },
-    isOk:{
+    isOk: {
+      get() {
+        return this.isOktemp;
+      },
+      set(val) {
+        this.isOktemp = val;
+      },
+    },
+    showPopover:{
       get(){
-        return this.isOktemp
+        return this.isShowPopover;
       },
       set(val){
-        this.isOktemp = val
-      },
-    }
+        this.isShowPopover = val;
+      }
+    },
   },
   watch: {
     todoValue() {
       console.log("change todo: ", this.$v.todoValue.$error);
     },
-    descriptionValue(){
+    descriptionValue() {
       console.log("change desc: ", this.$v.descriptionValue.$error);
     },
-    selected(){
+    selected() {
       console.log("change status: ", this.$v.selected.$error);
-
-    }, 
+    },
     checked() {
       this.checked ? (this.background = "dark") : (this.background = "light");
     },
@@ -441,24 +470,23 @@ export default {
     sortState() {
       console.log(this.sortState);
     },
-    taskId(){
-      console.log(this.taskId)
+    taskId() {
+      console.log(this.taskId);
     },
     // isOk(){
     //   console.log('isoke...........')
     // }
-    ischeckDuplicate(){
-      console.log('duplicate: ', this.ischeckDuplicate)
+    ischeckDuplicate() {
+      console.log("duplicate: ", this.ischeckDuplicate);
+    },
+    isShowPopover(){
+      console.log('popover, ', this.isShowPopover)
     }
   },
 
   methods: {
     ...mapMutations(["SORT_ITEMS_DESCENDING", "SORT_ITEMS_ASCENDING"]),
     ...mapActions(["getTodos", "addTask", "deleteTask", "editTask"]),
-    handler() {
-      console.log("asdasds");
-      this.todoValue = "";
-    },
     resetInfoModal() {
       this.todoValue = "";
       this.descriptionValue = "";
@@ -516,7 +544,6 @@ export default {
     handleSubmit(ref) {
       // Exit when the form isn't valid
 
-
       // Push the new data row
       if (ref === "modal1") {
         const data = {
@@ -568,7 +595,7 @@ export default {
     },
     checkDuplicateData() {
       this.ischeckDuplicate = false;
-      this.$v.$touch()
+      this.$v.$touch();
       this.items.forEach((item) => {
         if (
           item.todo == this.todoValue &&
@@ -579,21 +606,23 @@ export default {
         }
       });
 
-      if (
+      if(
         !this.$v.todoValue.$error &&
         !this.$v.descriptionValue.$error &&
         !this.$v.selected.$error &&
         !this.ischeckDuplicate
-      ) {
-        this.isOk = false
-      }else{
-        this.isOk = true
+      ){
+        this.isOk = false;
+      }else {
+        this.isOk = true;
       }
-
-      
     },
     onClickOutside() {
       this.sortState = null;
+    },
+    clickOutPopover(){
+      this.showPopover = false;
+
     },
     translateStatusField(val) {
       if (val === "New") return this.$t("field-tasklist.status.value.new");
@@ -605,28 +634,39 @@ export default {
       this.currentPage = 1;
       this.rows = filteredItems.length;
     },
-    deleteTodo(id) {
-      // console.log("delete: ", id);
+    deleteTodo(id, event) {
+      console.log('delte()', event)
       this.taskId = id;
-      // console.log(this.taskId);
+      this.showPopover = true;
     },
-    todoBlur(){
-      if(!this.$v?.todoValue.required && this.$v?.todoValue.$error || !this.$v?.todoValue.minLength || !this.$v?.todoValue.format){
-        this.isValidTodo = true
-      }else{
-        this.isValidTodo = false
-      }
-      this.checkDuplicateData();
+    hidePopover(){
+      console.log('hidepopover()')
+      this.showPopover = false;
     },
-    todoKeyUp(){
+    todoBlur() {
+      if (
+        (!this.$v?.todoValue.required && this.$v?.todoValue.$error) ||
+        !this.$v?.todoValue.minLength ||
+        !this.$v?.todoValue.format 
+        ) {
+          this.isValidTodo = true;
+        } else {
+          this.isValidTodo = false;
+        }
+        this.checkDuplicateData();
     },
-    descriptionBlur(){
-      if(!this.$v?.descriptionValue.required && this.$v?.descriptionValue.$error || !this.$v?.descriptionValue.minLength || !this.$v?.descriptionValue.format){
-        this.isValidDescription = true
-      }else{
-        this.isValidDescription = false
-      }
-      this.checkDuplicateData();
+    descriptionBlur() {
+      if (
+        (!this.$v?.descriptionValue.required &&
+        this.$v?.descriptionValue.$error) ||
+        !this.$v?.descriptionValue.minLength ||
+        !this.$v?.descriptionValue.format 
+        ) {
+          this.isValidDescription = true;
+        } else {
+          this.isValidDescription = false;
+        }
+        this.checkDuplicateData();
     },
   },
   beforeCreate() {
@@ -645,13 +685,13 @@ export default {
   mounted() {
     // console.log("mount", this.items.length, this.isBusy);
     // let totalrows = document.getElementById("totalRows");
-
     // console.log("mounted", totalrows);
   },
   beforeUpdate() {
     // console.log("beforeUpdate", this.items.length, this.isBusy, this.rows);
     if (this.rows == null && this.items.length > 0)
       this.rows = this.items.length;
+    this.rows= this.items.length
   },
   updated() {
     this.isBusy = false;
@@ -706,6 +746,27 @@ export default {
   }
   .pagination {
     // margin-top: 30px;
+  }
+  .deleteBtnWrapper {
+    position: relative;
+    .popover {
+      padding: 5px;
+      position: absolute;
+      top: -60px;
+      width: 100px;
+      background-color: rgb(194, 163, 163);
+      margin: auto;
+    .buttonPopover{
+      margin-top: 3px;
+      outline: none;
+      border: none;
+      padding: 0 5px;
+      border-radius: 3px;
+      &:hover{
+        background-color: #ccc;
+      }
+    }
+    }
   }
 }
 .iconBtn:hover {
